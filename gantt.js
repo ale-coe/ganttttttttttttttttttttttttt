@@ -17,26 +17,27 @@ const getCodes = (items) => {
   return items.map((i) => i.code);
 };
 
+/**
+ * Performance Ideas do batches of cols, mwo, text so that the ctx.fillStyle doesnt need to be changed that often
+ */
 const render = () => {
   const scrollIndexX = Math.floor(scrollWrapper.scrollLeft / COL_WIDTH);
-
   const scrollIndexY = Math.floor(scrollWrapper.scrollTop / ROW_HEIGHT);
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.font = "10px Arial";
 
-  // render codes
+  const endCol =
+    scrollIndexX + Math.ceil((canvas.width - X_OFFSET) / COL_WIDTH) + 1;
+  const endRow =
+    scrollIndexY + Math.ceil((canvas.height - 50) / ROW_HEIGHT) + 1;
   let datesPrinted = false;
-  for (let i = scrollIndexY; i < codes.length; i++) {
+  // render codes
+  for (let i = scrollIndexY; i < Math.min(endRow, codes.length); i++) {
     ctx.fillStyle = TEXT_COLOR;
     ctx.fillText(codes[i], 2, ROW_HEIGHT * (i - scrollIndexY) + Y_OFFSET);
 
-    if (ROW_HEIGHT * (i - scrollIndexY) + Y_OFFSET > CANVAS_HEIGHT) {
-      break;
-    }
-
     // render dates and blocks
-    for (let j = scrollIndexX; j < dates.length; j++) {
+    for (let j = scrollIndexX; j < Math.min(endCol, dates.length); j++) {
       const x =
         j === scrollIndexX
           ? COL_WIDTH * (j - scrollIndexX) + X_OFFSET
@@ -66,8 +67,10 @@ const render = () => {
         ctx.fillRect(x, 50, width, 750);
       }
 
-      if (matrix[i][j]) {
-        ctx.fillStyle = matrix[i][j].drag
+      const row = matrix[i];
+      const element = row[j];
+      if (element) {
+        ctx.fillStyle = element.drag
           ? DRAGGED_MWO_PLACEHOLDER_COLOR
           : MWO_COLOR;
         ctx.fillRect(
@@ -105,10 +108,6 @@ const render = () => {
           }
         }
       }
-
-      if (COL_WIDTH * (j - scrollIndexX) + X_OFFSET > CANVAS_WIDTH) {
-        break;
-      }
     }
 
     datesPrinted = true;
@@ -123,18 +122,16 @@ const render = () => {
       (dragX - X_OFFSET + scrollWrapper.scrollLeft) / COL_WIDTH
     );
 
+    const element = matrix[dragIndexY][dragIndexX];
     const x =
-      currentIndexX > matrix[dragIndexY][dragIndexX].maxCol
-        ? COL_WIDTH * matrix[dragIndexY][dragIndexX].maxCol +
+      currentIndexX > element.maxCol
+        ? COL_WIDTH * element.maxCol +
           X_OFFSET +
           COL_WIDTH -
           10 -
           scrollWrapper.scrollLeft
-        : currentIndexX < matrix[dragIndexY][dragIndexX].minCol
-        ? COL_WIDTH * matrix[dragIndexY][dragIndexX].minCol +
-          X_OFFSET +
-          2 -
-          scrollWrapper.scrollLeft
+        : currentIndexX < element.minCol
+        ? COL_WIDTH * element.minCol + X_OFFSET + 2 - scrollWrapper.scrollLeft
         : dragX;
 
     outOfBounds = x !== dragX;
@@ -274,7 +271,6 @@ function onScrollWrapperMouseDown(event) {
     } catch (error) {}
   }
 
-  console.log(color);
   // start connection
   if (color === DRAG_ANCHOR_BACK_COLOR) {
     connectionMode = true;
@@ -427,6 +423,7 @@ const virtualSize = document.querySelector("#gantt-virtual-size");
 const scrollWrapper = document.querySelector("#gantt-scroll-wrapper");
 const canvas = document.querySelector("#gantt-canvas");
 const ctx = canvas.getContext("2d", { willReadFrequently: true });
+ctx.font = "10px Arial";
 
 const items = getData() || generateItems(300);
 const codes = getCodes(items);
