@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Canvas Gantt - Viewport Only</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+      }
+      * {
+        box-sizing: border-box;
+      }
+
+      #gantt-wrapper {
+        border: 1px solid black;
+        height: 800px;
+        width: 1200px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      #gantt-scroll-wrapper {
+        border: 1px solid red;
+        position: absolute;
+        width: 1100px;
+        height: 750px;
+        top: 50px;
+        left: 100px;
+        overflow: scroll;
+      }
+
+      #gantt-canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 1200px;
+        height: 800px;
+      }
+
+      #gantt-virtual-size {
+        height: 3000px;
+        width: 5000px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="gantt-wrapper">
+      <canvas
+        height="800"
+        width="1200"
+        id="gantt-canvas"
+        onclick="onCanvasClick(event)"
+        oncontextmenu="onContextMenu(event)"
+      ></canvas>
+      <div
+        id="gantt-scroll-wrapper"
+        onscroll="onScroll()"
+        onmousedown="onScrollWrapperMouseDown(event)"
+        oncontextmenu="onContextMenu(event)"
+      >
+        <div id="gantt-virtual-size"></div>
+      </div>
+    </div>
+    <script src="gantt.js"></script>
+  </body>
+</html>
