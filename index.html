@@ -42,10 +42,19 @@
         height: 3000px;
         width: 5000px;
       }
+
+      #blocker {
+        background-color: white;
+        position: absolute;
+        width: 100px;
+        height: 50px;
+        z-index: 2;
+      }
     </style>
   </head>
   <body>
     <div id="gantt-wrapper">
+      <div id="blocker"></div>
       <canvas
         height="800"
         width="1200"
@@ -62,6 +71,7 @@
         <div id="gantt-virtual-size"></div>
       </div>
     </div>
+    <script src="data.js"></script>
     <script src="gantt.js"></script>
   </body>
 </html>

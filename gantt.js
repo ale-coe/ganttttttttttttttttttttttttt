@@ -24,6 +24,8 @@ function generateItems(count) {
         startDate: start.getTime(),
         code: makeCode(),
         dueDate: due.getTime(),
+        minCol: Number.NEGATIVE_INFINITY,
+        maxCol: Number.POSITIVE_INFINITY,
       };
     })
     .sort((a, b) => a.startDate - b.startDate);
@@ -50,7 +52,7 @@ const getCodes = (items) => {
 
 const render = () => {
   const scrollIndexX = Math.floor(scrollWrapper.scrollLeft / COL_WIDTH);
-  // TODO1: height
+
   const scrollIndexY = Math.floor(scrollWrapper.scrollTop / ROW_HEIGHT);
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -74,6 +76,7 @@ const render = () => {
           : COL_WIDTH * (j - scrollIndexX) +
             X_OFFSET -
             (scrollWrapper.scrollLeft % COL_WIDTH);
+      // TODO1: height (for codes)
       const width =
         scrollWrapper.scrollLeft % COL_WIDTH && j === scrollIndexX
           ? COL_WIDTH - (scrollWrapper.scrollLeft % COL_WIDTH)
@@ -81,7 +84,11 @@ const render = () => {
 
       if (!datesPrinted) {
         ctx.fillStyle = "black";
-        ctx.fillText(dates[j], x, 40, width);
+        ctx.fillText(
+          dates[j],
+          width < COL_WIDTH ? x - (COL_WIDTH - width) : x, // if not enough width, set start to negative value since container for text cannot really shrink
+          40
+        );
 
         if (j % 2) {
           ctx.fillStyle = "grey";
@@ -143,9 +150,29 @@ const render = () => {
   }
 
   if (drag) {
+    const currentIndexX = Math.floor(
+      (dragX - X_OFFSET + scrollWrapper.scrollLeft) / COL_WIDTH
+    );
+
+    const x =
+      currentIndexX > matrix[dragIndexY][dragIndexX].maxCol
+        ? COL_WIDTH * matrix[dragIndexY][dragIndexX].maxCol +
+          X_OFFSET +
+          COL_WIDTH -
+          10 -
+          scrollWrapper.scrollLeft
+        : currentIndexX < matrix[dragIndexY][dragIndexX].minCol
+        ? COL_WIDTH * matrix[dragIndexY][dragIndexX].minCol +
+          X_OFFSET +
+          2 -
+          scrollWrapper.scrollLeft
+        : dragX;
+
+    outOfBounds = x !== dragX;
+
     ctx.fillStyle = "blue";
     ctx.fillRect(
-      dragX,
+      x,
       ROW_HEIGHT * dragIndexY + Y_OFFSET - 9,
       COL_WIDTH,
       ROW_HEIGHT
@@ -154,35 +181,60 @@ const render = () => {
 
   if (connectionMode) {
     ctx.fillStyle = "black";
-    ctx.beginPath();
-    ctx.moveTo(
+    const connectionStartX =
       connectionStartIndexX * COL_WIDTH +
-        COL_WIDTH -
-        5 -
-        scrollWrapper.scrollLeft +
-        X_OFFSET,
-      connectionStartIndexY * ROW_HEIGHT + 10 - scrollWrapper.scrollTop + 50
-    );
+      COL_WIDTH -
+      5 -
+      scrollWrapper.scrollLeft +
+      X_OFFSET;
+
+    const connectionStartY =
+      connectionStartIndexY * ROW_HEIGHT + 10 - scrollWrapper.scrollTop + 50;
+
+    // TODO1: check if /0 -> NaN/Infinity
+    // const m =
+    //   (connectionEndY - connectionStartY) / (connectionStartX - connectionEndX);
+    // const n = connectionStartY / (m * connectionStartX);
+
+    // y = mx + n
+    // x = (y-n)/m
+    // more of a heuristic
+    // TODO1: use linear equation to make it better
+    const _connectionStartX = Math.max(connectionStartX, X_OFFSET);
+    const _connectionStartY = Math.max(connectionStartY, 50);
+    // console.log(connectionStartX, _connectionStartX);
+    ctx.beginPath();
+    ctx.moveTo(_connectionStartX, _connectionStartY);
     ctx.lineTo(connectionEndX, connectionEndY);
     ctx.stroke();
   }
 };
 
 const drawConnection = (connection) => {
-  console.log(connection);
   const { startIndexX, startIndexY, endIndexX, endIndexY } = connection;
 
   const start = {
-    x:
+    x: Math.max(
       startIndexX * COL_WIDTH - scrollWrapper.scrollLeft + COL_WIDTH + X_OFFSET,
-    y: startIndexY * ROW_HEIGHT - scrollWrapper.scrollTop + 10 + 50,
+      X_OFFSET
+    ),
+    y: Math.max(
+      startIndexY * ROW_HEIGHT - scrollWrapper.scrollTop + 10 + 50,
+      50
+    ),
   };
 
   const end = {
-    x: endIndexX * COL_WIDTH - scrollWrapper.scrollLeft + X_OFFSET,
-    y: endIndexY * ROW_HEIGHT - scrollWrapper.scrollTop + 10 + 50,
+    x: Math.max(
+      endIndexX * COL_WIDTH - scrollWrapper.scrollLeft + X_OFFSET,
+      X_OFFSET
+    ),
+    y: Math.max(endIndexY * ROW_HEIGHT - scrollWrapper.scrollTop + 10 + 50, 50),
   };
 
+  if (start.x === end.x || start.y === endIndexY) {
+    return;
+  }
   // Build a simple H → V → H "dog-leg" path (only right angles)
   const midX = (start.x + end.x) / 2;
 
@@ -235,9 +287,8 @@ function onScrollWrapperMouseDown(event) {
   const [r, g, b] = data;
   const color = `${r}${g}${b}`;
 
+  // start drag
   if (color === "01280") {
-    // start drag
-
     dragIndexX = indexX;
     dragIndexY = indexY;
     drag = true;
@@ -255,12 +306,12 @@ function onScrollWrapperMouseDown(event) {
     } catch (error) {}
   }
 
+  // start connection
   if (color === "000") {
     connectionMode = true;
 
     connectionStartIndexX = indexX;
     connectionStartIndexY = indexY;
-    console.log(connectionStartIndexX);
 
     try {
       matrix[connectionStartIndexY][
@@ -272,17 +323,29 @@ function onScrollWrapperMouseDown(event) {
 
 addEventListener("mousemove", (event) => {
   if (drag) {
-    clearInterval(timer);
-
     dragX = event.clientX;
 
+    clearInterval(timer);
     requestAnimationFrame(render);
 
-    if (event.clientX > 1150 && event.clientX < 1200) {
+    // Horizontal scroll
+    if (!outOfBounds && event.clientX > 1150 && event.clientX < 1200) {
       timer = setInterval(() => {
+        if (outOfBounds) {
+          clearInterval(timer);
+          return;
+        }
         scrollWrapper.scrollLeft += COL_WIDTH;
       }, 50);
-    } else if (event.clientX > X_OFFSET && event.clientX < 150) {
+    } else if (
+      !outOfBounds &&
+      event.clientX > X_OFFSET &&
+      event.clientX < 150
+    ) {
+      if (outOfBounds) {
+        clearInterval(timer);
+        return;
+      }
       timer = setInterval(() => {
         scrollWrapper.scrollLeft -= COL_WIDTH;
       }, 50);
@@ -297,6 +360,7 @@ addEventListener("mousemove", (event) => {
 
     requestAnimationFrame(render);
 
+    // Horizontal + vertical scroll
     if (event.clientX > 1150 && event.clientX < 1200) {
       timer = setInterval(() => {
         scrollWrapper.scrollLeft += COL_WIDTH;
@@ -304,6 +368,16 @@ addEventListener("mousemove", (event) => {
     } else if (event.clientX > X_OFFSET && event.clientX < 150) {
       timer = setInterval(() => {
         scrollWrapper.scrollLeft -= COL_WIDTH;
+      }, 50);
+    } else if (event.clientY > 750 && event.clientY < 800) {
+      timer = setInterval(() => {
+        // I know COL_WIDTH although ROW
+        scrollWrapper.scrollTop += COL_WIDTH;
+      }, 50);
+    } else if (event.clientY > 50 && event.clientY < 100) {
+      timer = setInterval(() => {
+        // I know COL_WIDTH although ROW
+        scrollWrapper.scrollTop -= COL_WIDTH;
       }, 50);
     }
   }
@@ -334,6 +408,21 @@ addEventListener("mouseup", (event) => {
       const indexY = Math.floor(
         (event.clientY + scrollWrapper.scrollTop - 50) / ROW_HEIGHT
       );
+
+      matrix[connectionStartIndexY][connectionStartIndexX].maxCol = Math.min(
+        matrix[connectionStartIndexY][connectionStartIndexX].maxCol,
+        indexX - 1
+      );
+
+      matrix[indexY][indexX].minCol = Math.max(
+        matrix[indexY][indexX].minCol,
+        connectionStartIndexX + 1
+      );
+
+      // console.log(
+      //   matrix[connectionStartIndexY][connectionStartIndexX],
+      //   matrix[indexY][indexX]
+      // );
 
       connections.push({
         startIndexX: connectionStartIndexX,
@@ -366,7 +455,7 @@ const scrollWrapper = document.querySelector("#gantt-scroll-wrapper");
 const canvas = document.querySelector("#gantt-canvas");
 const ctx = canvas.getContext("2d", { willReadFrequently: true });
 
-const items = generateItems(300);
+const items = getData() || generateItems(300);
 const codes = getCodes(items);
 const dates = getDates(items);
 const startDate = dates[0];
@@ -377,6 +466,7 @@ let dragIndexX = 0;
 let dragIndexY = 0;
 let dragX = 0;
 let drag = false;
+let outOfBounds = false;
 
 let connectionStartIndexX = 0;
 let connectionStartIndexY = 0;
