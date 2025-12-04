@@ -1,36 +1,3 @@
-function generateItems(count) {
-  const startMin = new Date("2024-02-01");
-  const endMax = new Date("2026-11-01");
-
-  const randomDate = (min, max) => {
-    const timestamp =
-      min.getTime() + Math.random() * (max.getTime() - min.getTime());
-    return new Date(timestamp);
-  };
-
-  const makeCode = (length = 6) =>
-    Array.from({ length }, () =>
-      Math.floor(Math.random() * 36)
-        .toString(36)
-        .toUpperCase()
-    ).join("");
-
-  return Array.from({ length: count })
-    .map(() => {
-      const start = randomDate(startMin, endMax);
-      let due = randomDate(start, endMax); // dueDate should be >= startDate
-
-      return {
-        startDate: start.getTime(),
-        code: makeCode(),
-        dueDate: due.getTime(),
-        minCol: Number.NEGATIVE_INFINITY,
-        maxCol: Number.POSITIVE_INFINITY,
-      };
-    })
-    .sort((a, b) => a.startDate - b.startDate);
-}
-
 const getDates = (items) => {
   const dates = [];
   const startDate = items[0].startDate - 0 * MS_PER_DAY;
@@ -61,7 +28,7 @@ const render = () => {
   // render codes
   let datesPrinted = false;
   for (let i = scrollIndexY; i < codes.length; i++) {
-    ctx.fillStyle = "black";
+    ctx.fillStyle = TEXT_COLOR;
     ctx.fillText(codes[i], 2, ROW_HEIGHT * (i - scrollIndexY) + Y_OFFSET);
 
     if (ROW_HEIGHT * (i - scrollIndexY) + Y_OFFSET > CANVAS_HEIGHT) {
@@ -83,7 +50,7 @@ const render = () => {
           : COL_WIDTH;
 
       if (!datesPrinted) {
-        ctx.fillStyle = "black";
+        ctx.fillStyle = TEXT_COLOR;
         ctx.fillText(
           dates[j],
           width < COL_WIDTH ? x - (COL_WIDTH - width) : x, // if not enough width, set start to negative value since container for text cannot really shrink
@@ -91,16 +58,18 @@ const render = () => {
         );
 
         if (j % 2) {
-          ctx.fillStyle = "grey";
+          ctx.fillStyle = SECOND_COL_COLOR;
         } else {
-          ctx.fillStyle = "white";
+          ctx.fillStyle = FIRST_COL_COLOR;
         }
 
         ctx.fillRect(x, 50, width, 750);
       }
 
       if (matrix[i][j]) {
-        ctx.fillStyle = matrix[i][j].drag ? "red" : "green";
+        ctx.fillStyle = matrix[i][j].drag
+          ? DRAGGED_MWO_PLACEHOLDER_COLOR
+          : MWO_COLOR;
         ctx.fillRect(
           x,
           ROW_HEIGHT * (i - scrollIndexY) + Y_OFFSET - 9,
@@ -111,7 +80,7 @@ const render = () => {
         if (!drag) {
           if (width === COL_WIDTH) {
             ctx.beginPath();
-            ctx.fillStyle = "black";
+            ctx.fillStyle = DRAG_ANCHOR_FRONT_COLOR;
             ctx.arc(
               x + 5,
               ROW_HEIGHT * (i - scrollIndexY) + Y_OFFSET - 9 + 10,
@@ -124,7 +93,7 @@ const render = () => {
 
           if (width >= 10) {
             ctx.beginPath();
-            ctx.fillStyle = "black";
+            ctx.fillStyle = DRAG_ANCHOR_BACK_COLOR;
             ctx.arc(
               x + 5 + width - 10,
               ROW_HEIGHT * (i - scrollIndexY) + Y_OFFSET - 9 + 10,
@@ -170,17 +139,17 @@ const render = () => {
 
     outOfBounds = x !== dragX;
 
-    ctx.fillStyle = "blue";
+    ctx.fillStyle = DRAGGED_MWO_COLOR;
     ctx.fillRect(
       x,
-      ROW_HEIGHT * dragIndexY + Y_OFFSET - 9,
+      ROW_HEIGHT * dragIndexY + Y_OFFSET - scrollWrapper.scrollTop - 9,
       COL_WIDTH,
       ROW_HEIGHT
     );
   }
 
   if (connectionMode) {
-    ctx.fillStyle = "black";
+    ctx.fillStyle = CONNECTION_LINE_COLOR;
     const connectionStartX =
       connectionStartIndexX * COL_WIDTH +
       COL_WIDTH -
@@ -191,18 +160,17 @@ const render = () => {
     const connectionStartY =
       connectionStartIndexY * ROW_HEIGHT + 10 - scrollWrapper.scrollTop + 50;
 
+    // TODO1: use linear equation to make it better
     // TODO1: check if /0 -> NaN/Infinity
     // const m =
     //   (connectionEndY - connectionStartY) / (connectionStartX - connectionEndX);
     // const n = connectionStartY / (m * connectionStartX);
-
     // y = mx + n
     // x = (y-n)/m
+
     // more of a heuristic
-    // TODO1: use linear equation to make it better
     const _connectionStartX = Math.max(connectionStartX, X_OFFSET);
     const _connectionStartY = Math.max(connectionStartY, 50);
-    // console.log(connectionStartX, _connectionStartX);
     ctx.beginPath();
     ctx.moveTo(_connectionStartX, _connectionStartY);
     ctx.lineTo(connectionEndX, connectionEndY);
@@ -285,18 +253,18 @@ function onScrollWrapperMouseDown(event) {
 
   const { data } = ctx.getImageData(event.clientX, event.clientY, 1, 1);
   const [r, g, b] = data;
-  const color = `${r}${g}${b}`;
+  const color = `rgb(${r} ${g} ${b})`;
 
   // start drag
-  if (color === "01280") {
+  if (color === MWO_COLOR) {
     dragIndexX = indexX;
     dragIndexY = indexY;
     drag = true;
 
-    ctx.fillStyle = "red";
+    ctx.fillStyle = DRAGGED_MWO_PLACEHOLDER_COLOR;
     ctx.fillRect(
-      COL_WIDTH * indexX + X_OFFSET,
-      ROW_HEIGHT * indexY + Y_OFFSET - 9,
+      COL_WIDTH * indexX + X_OFFSET - scrollWrapper.scrollLeft,
+      ROW_HEIGHT * indexY + Y_OFFSET - scrollWrapper.scrollTop - 9,
       COL_WIDTH,
       ROW_HEIGHT
     );
@@ -306,8 +274,9 @@ function onScrollWrapperMouseDown(event) {
     } catch (error) {}
   }
 
+  console.log(color);
   // start connection
-  if (color === "000") {
+  if (color === DRAG_ANCHOR_BACK_COLOR) {
     connectionMode = true;
 
     connectionStartIndexX = indexX;
@@ -398,9 +367,9 @@ addEventListener("mouseup", (event) => {
   if (connectionMode) {
     const { data } = ctx.getImageData(event.clientX, event.clientY, 1, 1);
     const [r, g, b] = data;
-    const color = `${r}${g}${b}`;
+    const color = `rgb(${r} ${g} ${b})`;
 
-    if (color === "000") {
+    if (color === DRAG_ANCHOR_FRONT_COLOR) {
       // connected with another mwo
       const indexX = Math.floor(
         (event.clientX - X_OFFSET + scrollWrapper.scrollLeft) / COL_WIDTH
@@ -419,11 +388,6 @@ addEventListener("mouseup", (event) => {
         connectionStartIndexX + 1
       );
 
-      // console.log(
-      //   matrix[connectionStartIndexY][connectionStartIndexX],
-      //   matrix[indexY][indexX]
-      // );
-
       connections.push({
         startIndexX: connectionStartIndexX,
         startIndexY: connectionStartIndexY,
@@ -441,7 +405,16 @@ addEventListener("mouseup", (event) => {
   }
 });
 
-let timer = null;
+const FIRST_COL_COLOR = `rgb(255 255 255)`;
+const SECOND_COL_COLOR = `rgb(155 155 155)`;
+const TEXT_COLOR = `rgb(0 0 0)`;
+const DRAG_ANCHOR_FRONT_COLOR = `rgb(1 1 1)`;
+const DRAG_ANCHOR_BACK_COLOR = `rgb(2 2 2)`;
+const MWO_COLOR = `rgb(0 128 0)`;
+const DRAGGED_MWO_COLOR = `rgb(0 0 255)`;
+const DRAGGED_MWO_PLACEHOLDER_COLOR = `rgb(255 0 0)`;
+const CONNECTION_LINE_COLOR = `rgb(3 3 3)`;
+
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const ROW_HEIGHT = 20;
 const COL_WIDTH = 60;
@@ -461,6 +434,8 @@ const dates = getDates(items);
 const startDate = dates[0];
 const matrix = [];
 const connections = [];
+
+let timer = null;
 
 let dragIndexX = 0;
 let dragIndexY = 0;

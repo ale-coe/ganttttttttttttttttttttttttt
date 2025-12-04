@@ -301,6 +301,39 @@ const data = [
   { startDate: 1793477161376, code: "UXX8SO", dueDate: 1793490738840 },
 ];
 
+const generateItems = (count) => {
+  const startMin = new Date("2024-02-01");
+  const endMax = new Date("2026-11-01");
+
+  const randomDate = (min, max) => {
+    const timestamp =
+      min.getTime() + Math.random() * (max.getTime() - min.getTime());
+    return new Date(timestamp);
+  };
+
+  const makeCode = (length = 6) =>
+    Array.from({ length }, () =>
+      Math.floor(Math.random() * 36)
+        .toString(36)
+        .toUpperCase()
+    ).join("");
+
+  return Array.from({ length: count })
+    .map(() => {
+      const start = randomDate(startMin, endMax);
+      let due = randomDate(start, endMax); // dueDate should be >= startDate
+
+      return {
+        startDate: start.getTime(),
+        code: makeCode(),
+        dueDate: due.getTime(),
+        minCol: Number.NEGATIVE_INFINITY,
+        maxCol: Number.POSITIVE_INFINITY,
+      };
+    })
+    .sort((a, b) => a.startDate - b.startDate);
+};
+
 const getData = () => {
   return data.map((e) => ({
     ...e,
