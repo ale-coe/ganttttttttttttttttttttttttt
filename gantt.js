@@ -350,10 +350,29 @@ addEventListener("mousemove", (event) => {
 
 addEventListener("mouseup", (event) => {
   if (drag) {
+    const { indexX } = getIndicesFromEvent(event);
     clearInterval(timer);
 
     try {
       matrix[dragIndexY][dragIndexX].drag = false;
+
+      if (indexX !== dragIndexX) {
+        const mwo = matrix[dragIndexY][dragIndexX];
+        mwo.startDate = new Date(dates[indexX]);
+        matrix[dragIndexY][indexX] = mwo;
+        matrix[dragIndexY][dragIndexX] = null;
+
+        connections = connections.map((c) => {
+          if (c.codeStart === mwo.code) {
+            c.startIndexX = indexX;
+          }
+          if (c.endeCode === mwo.code) {
+            c.codeEnd = indexX;
+          }
+
+          return c;
+        });
+      }
     } catch (error) {}
 
     drag = false;
@@ -367,28 +386,26 @@ addEventListener("mouseup", (event) => {
 
     if (color === DRAG_ANCHOR_FRONT_COLOR) {
       // connected with another mwo
-      const indexX = Math.floor(
-        (event.clientX - X_OFFSET + scrollWrapper.scrollLeft) / COL_WIDTH
-      );
-      const indexY = Math.floor(
-        (event.clientY + scrollWrapper.scrollTop - 50) / ROW_HEIGHT
-      );
+      const { indexX: connectionEndIndexX, indexY: connectionEndIndexY } =
+        getIndicesFromEvent(event);
 
       matrix[connectionStartIndexY][connectionStartIndexX].maxCol = Math.min(
         matrix[connectionStartIndexY][connectionStartIndexX].maxCol,
-        indexX - 1
+        connectionEndIndexX - 1
       );
 
-      matrix[indexY][indexX].minCol = Math.max(
-        matrix[indexY][indexX].minCol,
+      matrix[connectionEndIndexY][connectionEndIndexX].minCol = Math.max(
+        matrix[connectionEndIndexY][connectionEndIndexX].minCol,
         connectionStartIndexX + 1
       );
 
       connections.push({
         startIndexX: connectionStartIndexX,
         startIndexY: connectionStartIndexY,
-        endIndexX: indexX,
-        endIndexY: indexY,
+        endIndexX: connectionEndIndexX,
+        endIndexY: connectionEndIndexY,
+        codeStart: matrix[connectionStartIndexY][connectionStartIndexX].code,
+        codeEnd: matrix[connectionEndIndexY][connectionEndIndexX].code,
       });
     }
 
@@ -400,6 +417,17 @@ addEventListener("mouseup", (event) => {
     requestAnimationFrame(render);
   }
 });
+
+const getIndicesFromEvent = (event) => {
+  const indexX = Math.floor(
+    (event.clientX - X_OFFSET + scrollWrapper.scrollLeft) / COL_WIDTH
+  );
+  const indexY = Math.floor(
+    (event.clientY + scrollWrapper.scrollTop - 50) / ROW_HEIGHT
+  );
+
+  return { indexX, indexY };
+};
 
 const FIRST_COL_COLOR = `rgb(255 255 255)`;
 const SECOND_COL_COLOR = `rgb(155 155 155)`;
@@ -430,7 +458,7 @@ const codes = getCodes(items);
 const dates = getDates(items);
 const startDate = dates[0];
 const matrix = [];
-const connections = [];
+let connections = [];
 
 let timer = null;
 
