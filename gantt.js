@@ -143,33 +143,42 @@ const render = () => {
   if (connectionMode) {
     ctx.strokeStyle = CONNECTION_LINE_COLOR;
     ctx.lineWidth = 1;
-    const connectionStartX =
-      connectionStartIndexX * COL_WIDTH +
-      COL_WIDTH -
-      5 -
-      scrollWrapper.scrollLeft +
-      X_OFFSET;
 
-    const connectionStartY =
-      connectionStartIndexY * ROW_HEIGHT +
-      10 -
-      scrollWrapper.scrollTop +
-      Y_OFFSET;
-
-    // TODO1: use linear equation to make it better
-    // TODO1: check if /0 -> NaN/Infinity
-    // const m =
-    //   (connectionEndY - connectionStartY) / (connectionStartX - connectionEndX);
-    // const n = connectionStartY / (m * connectionStartX);
-    // y = mx + n
-    // x = (y-n)/m
-
-    // more of a heuristic
-    const _connectionStartX = Math.max(connectionStartX, X_OFFSET);
-    const _connectionStartY = Math.max(connectionStartY, Y_OFFSET);
+    // render multiple lines
     ctx.beginPath();
-    ctx.moveTo(_connectionStartX, _connectionStartY);
-    ctx.lineTo(connectionEndX, connectionEndY);
+    for (const [
+      connectionStartIndexX,
+      connectionStartIndexY,
+    ] of connectionIndicators) {
+      const connectionStartX =
+        connectionStartIndexX * COL_WIDTH +
+        COL_WIDTH -
+        5 -
+        scrollWrapper.scrollLeft +
+        X_OFFSET;
+
+      const connectionStartY =
+        connectionStartIndexY * ROW_HEIGHT +
+        10 -
+        scrollWrapper.scrollTop +
+        Y_OFFSET;
+
+      // TODO1: use linear equation to make it better
+      // TODO1: check if /0 -> NaN/Infinity
+      // const m =
+      //   (connectionEndY - connectionStartY) / (connectionStartX - connectionEndX);
+      // const n = connectionStartY / (m * connectionStartX);
+      // y = mx + n
+      // x = (y-n)/m
+
+      // more of a heuristic
+      const _connectionStartX = Math.max(connectionStartX, X_OFFSET);
+      const _connectionStartY = Math.max(connectionStartY, Y_OFFSET);
+
+      ctx.moveTo(_connectionStartX, _connectionStartY);
+      ctx.lineTo(connectionEndX, connectionEndY);
+    }
+
     ctx.stroke();
   }
 };
@@ -248,17 +257,13 @@ function onContextMenu(event) {
 }
 
 function onScrollWrapperMouseDown(event) {
-  const indexX = Math.floor(
-    (event.clientX + scrollWrapper.scrollLeft - X_OFFSET) / COL_WIDTH
-  );
+  // right click
+  if (event.button === 2) {
+    return;
+  }
 
-  const indexY = Math.floor(
-    (event.clientY + scrollWrapper.scrollTop - Y_OFFSET) / ROW_HEIGHT
-  );
-
-  const { data } = ctx.getImageData(event.clientX, event.clientY, 1, 1);
-  const [r, g, b] = data;
-  const color = `rgb(${r} ${g} ${b})`;
+  const { indexX, indexY } = getIndicesFromEvent(event);
+  const color = getColorFromEventPosition(event);
 
   // start drag
   if (color === MWO_COLOR) {
@@ -283,15 +288,7 @@ function onScrollWrapperMouseDown(event) {
   if (color === DRAG_ANCHOR_BACK_COLOR) {
     connectionMode = true;
 
-    connectionStartIndexX = indexX;
-    connectionStartIndexY = indexY;
-
-    try {
-      getElement(
-        connectionStartIndexX,
-        connectionStartIndexY
-      ).connectionMode = true;
-    } catch (error) {}
+    connectionIndicators.push([indexX, indexY]);
   }
 
   // delete connections
@@ -323,7 +320,6 @@ function onScrollWrapperMouseDown(event) {
             event.clientY >= start.y &&
             event.clientY <= end.y
           ) {
-            console.log(connection);
             const connectionId = `${connection.startIndexX}.${connection.startIndexY}.${connection.endIndexX}.${connection.endIndexY}`;
             connections = connections.filter((c) => c.id !== connectionId);
 
@@ -414,12 +410,13 @@ addEventListener("mousemove", (event) => {
 
 addEventListener("mouseup", (event) => {
   if (drag) {
-    const { indexX } = getIndicesFromEvent(event);
     clearInterval(timer);
     getElement(dragIndexX, dragIndexY).drag = false;
 
     if (!outOfBounds) {
-      if (indexX !== dragIndexX) {
+      const { indexX } = getIndicesFromEvent(event);
+
+      if (indexX !== dragIndexX && indexX >= 0 && indexX <= dates.length - 1) {
         const mwo = getElement(dragIndexX, dragIndexY);
         setElement(indexX, dragIndexY, mwo);
         deleteElement(dragIndexX, dragIndexY);
@@ -460,9 +457,8 @@ addEventListener("mouseup", (event) => {
   }
 
   if (connectionMode) {
-    const { data } = ctx.getImageData(event.clientX, event.clientY, 1, 1);
-    const [r, g, b] = data;
-    const color = `rgb(${r} ${g} ${b})`;
+    clearInterval(timer);
+    const color = getColorFromEventPosition(event);
 
     // EnSt
     if (color === DRAG_ANCHOR_FRONT_COLOR) {
@@ -470,16 +466,38 @@ addEventListener("mouseup", (event) => {
       const { indexX: connectionEndIndexX, indexY: connectionEndIndexY } =
         getIndicesFromEvent(event);
 
-      addConnection(
+      for (const [
         connectionStartIndexX,
         connectionStartIndexY,
-        connectionEndIndexX,
-        connectionEndIndexY
-      );
+      ] of connectionIndicators) {
+        addConnection(
+          connectionStartIndexX,
+          connectionStartIndexY,
+          connectionEndIndexX,
+          connectionEndIndexY
+        );
+      }
     }
 
     connectionMode = false;
+    connectionIndicators = [];
     requestAnimationFrame(render);
+  }
+});
+
+addEventListener("keydown", (event) => {
+  // !event.repeat prevents indefinite pressing from being emitted over and over again
+  if (event.ctrlKey && !event.repeat) {
+    const _event = {
+      clientX: connectionEndX,
+      clientY: connectionEndY,
+    };
+    const color = getColorFromEventPosition(_event);
+
+    if (color === DRAG_ANCHOR_BACK_COLOR) {
+      const { indexX, indexY } = getIndicesFromEvent(_event);
+      connectionIndicators.push([indexX, indexY]);
+    }
   }
 });
 
@@ -538,6 +556,12 @@ const getXIndexFromDate = (date) => {
   return Math.floor((date - new Date(startDate).getTime()) / MS_PER_DAY);
 };
 
+const getColorFromEventPosition = (event) => {
+  const { data } = ctx.getImageData(event.clientX, event.clientY, 1, 1);
+  const [r, g, b] = data;
+  return `rgb(${r} ${g} ${b})`;
+};
+
 const FIRST_COL_COLOR = `rgb(255 255 255)`;
 const SECOND_COL_COLOR = `rgb(155 155 155)`;
 const TEXT_COLOR = `rgb(0 0 0)`;
@@ -545,7 +569,7 @@ const DRAG_ANCHOR_FRONT_COLOR = `rgb(1 1 1)`;
 const DRAG_ANCHOR_BACK_COLOR = `rgb(2 2 2)`;
 const MWO_COLOR = `rgb(0 128 0)`;
 const DRAGGED_MWO_COLOR = `rgb(0 0 255)`;
-const DRAGGED_MWO_PLACEHOLDER_COLOR = `rgb(255 0 0)`;
+const DRAGGED_MWO_PLACEHOLDER_COLOR = `rgb(0 200 0)`;
 const CONNECTION_LINE_COLOR = `rgb(3 3 3)`;
 
 const SCROLL_SPEED = 50;
@@ -579,8 +603,7 @@ let dragX = 0;
 let drag = false;
 let outOfBounds = false;
 
-let connectionStartIndexX = 0;
-let connectionStartIndexY = 0;
+let connectionIndicators = [];
 let connectionEndX = 0;
 let connectionEndY = 0;
 let connectionMode = false;
@@ -598,16 +621,16 @@ virtualSize.style.height = `${codes.length * ROW_HEIGHT}px`;
 virtualSize.style.width = `${dates.length * COL_WIDTH}px`;
 
 // add test values -------------------------------------------------------------------------
-const testConnections = [
-  [6, 2, 9, 4],
-  [6, 3, 9, 4],
-  [5, 1, 9, 4],
-  [5, 1, 13, 5],
-];
-// add test values -------------------------------------------------------------------------
+// const testConnections = [
+//   [6, 2, 9, 4],
+//   [6, 3, 9, 4],
+//   [5, 1, 9, 4],
+//   [5, 1, 13, 5],
+// ];
 
-for (const testConnection of testConnections) {
-  addConnection(...testConnection);
-}
+// for (const testConnection of testConnections) {
+//   addConnection(...testConnection);
+// }
+// add te st values -------------------------------------------------------------------------
 
 render();
