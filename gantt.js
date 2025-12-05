@@ -78,8 +78,7 @@ const render = () => {
         ctx.fillRect(x, Y_OFFSET, width, 750);
       }
 
-      const row = matrix[i];
-      const element = row[j];
+      const element = getElement(j, i);
       if (element) {
         ctx.fillStyle = element.drag
           ? DRAGGED_MWO_PLACEHOLDER_COLOR
@@ -117,7 +116,8 @@ const render = () => {
       (dragX - X_OFFSET + scrollWrapper.scrollLeft) / COL_WIDTH
     );
 
-    const element = matrix[dragIndexY][dragIndexX];
+    const element = getElement(dragIndexX, dragIndexY);
+
     const x =
       currentIndexX > element.maxCol
         ? COL_WIDTH * element.maxCol +
@@ -232,7 +232,6 @@ function onCanvasClick(event) {
   );
 
   scrollWrapper.scrollLeft = indexX * COL_WIDTH;
-  console.log(item);
 }
 
 function onContextMenu(event) {
@@ -252,7 +251,7 @@ function onScrollWrapperMouseDown(event) {
   const [r, g, b] = data;
   const color = `rgb(${r} ${g} ${b})`;
 
-  console.log(matrix[indexY][indexX]);
+  console.log(getElement(indexX, indexY));
 
   // start drag
   if (color === MWO_COLOR) {
@@ -269,7 +268,7 @@ function onScrollWrapperMouseDown(event) {
     );
 
     try {
-      matrix[indexY][indexX].drag = true;
+      getElement(indexX, indexY).drag = true;
     } catch (error) {}
   }
 
@@ -281,9 +280,10 @@ function onScrollWrapperMouseDown(event) {
     connectionStartIndexY = indexY;
 
     try {
-      matrix[connectionStartIndexY][
-        connectionStartIndexX
-      ].connectionMode = true;
+      getElement(
+        connectionStartIndexX,
+        connectionStartIndexY
+      ).connectionMode = true;
     } catch (error) {}
   }
 }
@@ -354,13 +354,13 @@ addEventListener("mouseup", (event) => {
   if (drag) {
     const { indexX } = getIndicesFromEvent(event);
     clearInterval(timer);
-    matrix[dragIndexY][dragIndexX].drag = false;
+    getElement(dragIndexX, dragIndexY).drag = false;
 
     if (!outOfBounds) {
       if (indexX !== dragIndexX) {
-        const mwo = matrix[dragIndexY][dragIndexX];
-        matrix[dragIndexY][indexX] = mwo;
-        matrix[dragIndexY][dragIndexX] = null;
+        const mwo = getElement(dragIndexX, dragIndexY);
+        setElement(indexX, dragIndexY, mwo);
+        deleteElement(dragIndexX, dragIndexY);
 
         mwo.startDate = new Date(dates[indexX]);
         for (let i = 0; i < mwo.connectionsAsStart.length; i++) {
@@ -372,17 +372,23 @@ addEventListener("mouseup", (event) => {
         }
 
         for (let i = 0; i < mwo.predecessorMwos.length; i++) {
-          mwo.predecessorMwos[i].maxCol = Math.max(
-            mwo.predecessorMwos[i].maxCol,
-            indexX - 1
-          );
+          // get all successorMwos from current item, min index is new maxCol
+          mwo.predecessorMwos[i].maxCol =
+            Math.min(
+              ...mwo.predecessorMwos[i].successorMwos.map((e) =>
+                getXIndexFromDate(e.startDate)
+              )
+            ) - 1;
         }
 
         for (let i = 0; i < mwo.successorMwos.length; i++) {
-          mwo.successorMwos[i].minCol = Math.min(
-            mwo.successorMwos[i].minCol,
-            indexX + 1
-          );
+          // get all predecessorMwos from current item, max index is new minCol
+          mwo.successorMwos[i].minCol =
+            Math.max(
+              ...mwo.successorMwos[i].predecessorMwos.map((e) =>
+                getXIndexFromDate(e.startDate)
+              )
+            ) + 1;
         }
       }
     }
@@ -402,8 +408,11 @@ addEventListener("mouseup", (event) => {
       const { indexX: connectionEndIndexX, indexY: connectionEndIndexY } =
         getIndicesFromEvent(event);
 
-      const predecessor = matrix[connectionStartIndexY][connectionStartIndexX];
-      const successor = matrix[connectionEndIndexY][connectionEndIndexX];
+      const predecessor = getElement(
+        connectionStartIndexX,
+        connectionStartIndexY
+      );
+      const successor = getElement(connectionEndIndexX, connectionEndIndexY);
 
       predecessor.maxCol = Math.min(
         predecessor.maxCol,
@@ -444,6 +453,20 @@ const getIndicesFromEvent = (event) => {
   return { indexX, indexY };
 };
 
+const getElement = (indexX, indexY) => {
+  return matrix[`${indexY}.${indexX}`];
+};
+const setElement = (indexX, indexY, element) => {
+  matrix[`${indexY}.${indexX}`] = element;
+};
+const deleteElement = (indexX, indexY) => {
+  matrix[`${indexY}.${indexX}`] = null;
+};
+
+const getXIndexFromDate = (date) => {
+  return Math.floor((date - new Date(startDate).getTime()) / MS_PER_DAY);
+};
+
 const FIRST_COL_COLOR = `rgb(255 255 255)`;
 const SECOND_COL_COLOR = `rgb(155 155 155)`;
 const TEXT_COLOR = `rgb(0 0 0)`;
@@ -474,7 +497,7 @@ const items = getData() || generateItems(300);
 const codes = getCodes(items);
 const dates = getDates(items);
 const startDate = dates[0];
-const matrix = [];
+const matrix = {};
 let connections = [];
 
 let timer = null;
@@ -491,13 +514,13 @@ let connectionEndX = 0;
 let connectionEndY = 0;
 let connectionMode = false;
 
-for (const item of items) {
-  const arr = Array(dates.length).fill();
-  matrix.push(arr);
-  const index = Math.floor(
+for (let i = 0; i < items.length; i++) {
+  const item = items[i];
+  const indexX = Math.floor(
     (item.startDate - new Date(startDate).getTime()) / MS_PER_DAY
   );
-  arr[index] = item;
+  const key = `${i}.${indexX}`;
+  matrix[key] = item;
 }
 
 virtualSize.style.height = `${codes.length * ROW_HEIGHT}px`;
