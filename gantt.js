@@ -141,7 +141,8 @@ const render = () => {
   }
 
   if (connectionMode) {
-    ctx.fillStyle = CONNECTION_LINE_COLOR;
+    ctx.strokeStyle = CONNECTION_LINE_COLOR;
+    ctx.lineWidth = 1;
     const connectionStartX =
       connectionStartIndexX * COL_WIDTH +
       COL_WIDTH -
@@ -173,7 +174,7 @@ const render = () => {
   }
 };
 
-const drawConnection = (connection) => {
+const getPoints = (connection) => {
   const { startIndexX, startIndexY, endIndexX, endIndexY } = connection;
 
   const start = {
@@ -199,12 +200,20 @@ const drawConnection = (connection) => {
   };
 
   if (start.x === end.x || start.y === endIndexY) {
-    return;
+    return null;
   }
   // Build a simple H → V → H "dog-leg" path (only right angles)
   const midX = (start.x + end.x) / 2;
 
-  const points = [start, { x: midX, y: start.y }, { x: midX, y: end.y }, end];
+  return [start, { x: midX, y: start.y }, { x: midX, y: end.y }, end];
+};
+
+const drawConnection = (connection) => {
+  const points = getPoints(connection);
+  if (!points) return;
+
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = CONNECTION_LINE_COLOR;
 
   ctx.beginPath();
   ctx.moveTo(points[0].x, points[0].y);
@@ -251,8 +260,6 @@ function onScrollWrapperMouseDown(event) {
   const [r, g, b] = data;
   const color = `rgb(${r} ${g} ${b})`;
 
-  console.log(getElement(indexX, indexY));
-
   // start drag
   if (color === MWO_COLOR) {
     dragIndexX = indexX;
@@ -286,8 +293,63 @@ function onScrollWrapperMouseDown(event) {
       ).connectionMode = true;
     } catch (error) {}
   }
+
+  // delete connections
+  if (color === CONNECTION_LINE_COLOR) {
+    const currentIndexXMin = Math.floor(scrollWrapper.scrollLeft / COL_WIDTH);
+    const currentIndexXMax = currentIndexXMin + Math.ceil(1100 / COL_WIDTH);
+    const currentIndexYMin = Math.floor(scrollWrapper.scrollTop / ROW_HEIGHT);
+    const currentIndexYMax = currentIndexYMin + Math.ceil(750 / ROW_HEIGHT);
+
+    for (const connection of connections) {
+      const cxMin = Math.min(connection.startIndexX, connection.endIndexX);
+      const cxMax = Math.max(connection.startIndexX, connection.endIndexX);
+      const cyMin = Math.min(connection.startIndexY, connection.endIndexY);
+      const cyMax = Math.max(connection.startIndexY, connection.endIndexY);
+
+      const xOverlap = cxMax >= currentIndexXMin && cxMin <= currentIndexXMax;
+      const yOverlap = cyMax >= currentIndexYMin && cyMin <= currentIndexYMax;
+
+      if (xOverlap && yOverlap) {
+        const points = getPoints(connection);
+        for (let i = 0; i < points.length - 1; i++) {
+          // delete here
+          const start = points[i];
+          const end = points[i + 1];
+
+          if (
+            event.clientX >= start.x &&
+            event.clientX <= end.x &&
+            event.clientY >= start.y &&
+            event.clientY <= end.y
+          ) {
+            console.log(connection);
+            const connectionId = `${connection.startIndexX}.${connection.startIndexY}.${connection.endIndexX}.${connection.endIndexY}`;
+            connections = connections.filter((c) => c.id !== connectionId);
+
+            const startElement = getElement(
+              connection.startIndexX,
+              connection.startIndexY
+            );
+
+            startElement.connectionsAsStart.filter(
+              (c) => c.id !== connectionId
+            );
+            const endElement = getElement(
+              connection.endIndexX,
+              connection.endIndexY
+            );
+            endElement.connectionsAsEnd.filter((c) => c.id !== connectionId);
+          }
+        }
+      }
+    }
+
+    requestAnimationFrame(render);
+  }
 }
 
+// TODO1: triggers renders to often (not so good)...
 addEventListener("mousemove", (event) => {
   if (drag) {
     dragX = event.clientX;
@@ -408,39 +470,48 @@ addEventListener("mouseup", (event) => {
       const { indexX: connectionEndIndexX, indexY: connectionEndIndexY } =
         getIndicesFromEvent(event);
 
-      const predecessor = getElement(
+      addConnection(
         connectionStartIndexX,
-        connectionStartIndexY
+        connectionStartIndexY,
+        connectionEndIndexX,
+        connectionEndIndexY
       );
-      const successor = getElement(connectionEndIndexX, connectionEndIndexY);
-
-      predecessor.maxCol = Math.min(
-        predecessor.maxCol,
-        connectionEndIndexX - 1
-      );
-
-      successor.minCol = Math.max(successor.minCol, connectionStartIndexX + 1);
-
-      const connection = {
-        startIndexX: connectionStartIndexX,
-        startIndexY: connectionStartIndexY,
-        endIndexX: connectionEndIndexX,
-        endIndexY: connectionEndIndexY,
-      };
-
-      predecessor.successorMwos.push(successor);
-      predecessor.connectionsAsStart.push(connection);
-
-      successor.predecessorMwos.push(predecessor);
-      successor.connectionsAsEnd.push(connection);
-
-      connections.push(connection);
     }
 
     connectionMode = false;
     requestAnimationFrame(render);
   }
 });
+
+const addConnection = (
+  connectionStartIndexX,
+  connectionStartIndexY,
+  connectionEndIndexX,
+  connectionEndIndexY
+) => {
+  const predecessor = getElement(connectionStartIndexX, connectionStartIndexY);
+  const successor = getElement(connectionEndIndexX, connectionEndIndexY);
+
+  predecessor.maxCol = Math.min(predecessor.maxCol, connectionEndIndexX - 1);
+
+  successor.minCol = Math.max(successor.minCol, connectionStartIndexX + 1);
+
+  const connection = {
+    startIndexX: connectionStartIndexX,
+    startIndexY: connectionStartIndexY,
+    endIndexX: connectionEndIndexX,
+    endIndexY: connectionEndIndexY,
+    id: `${connectionStartIndexX}.${connectionStartIndexY}.${connectionEndIndexX}.${connectionEndIndexY}`,
+  };
+
+  predecessor.successorMwos.push(successor);
+  predecessor.connectionsAsStart.push(connection);
+
+  successor.predecessorMwos.push(predecessor);
+  successor.connectionsAsEnd.push(connection);
+
+  connections.push(connection);
+};
 
 const getIndicesFromEvent = (event) => {
   const indexX = Math.floor(
@@ -525,5 +596,18 @@ for (let i = 0; i < items.length; i++) {
 
 virtualSize.style.height = `${codes.length * ROW_HEIGHT}px`;
 virtualSize.style.width = `${dates.length * COL_WIDTH}px`;
+
+// add test values -------------------------------------------------------------------------
+const testConnections = [
+  [6, 2, 9, 4],
+  [6, 3, 9, 4],
+  [5, 1, 9, 4],
+  [5, 1, 13, 5],
+];
+// add test values -------------------------------------------------------------------------
+
+for (const testConnection of testConnections) {
+  addConnection(...testConnection);
+}
 
 render();
