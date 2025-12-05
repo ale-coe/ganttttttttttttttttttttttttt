@@ -36,12 +36,9 @@ const generateItems = (count) => {
 };
 
 const getData = () => {
-  return data.map((e) => ({
-    ...e,
-    minCol: Number.NEGATIVE_INFINITY,
-    maxCol: Number.POSITIVE_INFINITY,
-  }));
+  return data;
 };
+
 const data = [
   {
     startDate: 1706904718469,
@@ -51,6 +48,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1707325988874,
@@ -60,6 +59,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1707366325378,
@@ -69,6 +70,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1707401098524,
@@ -78,6 +81,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1707612559750,
@@ -87,6 +92,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1707995705711,
@@ -96,6 +103,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1708163494027,
@@ -105,6 +114,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1708330403265,
@@ -114,6 +125,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1708648375736,
@@ -123,6 +136,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1709016705268,
@@ -132,6 +147,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1711082511186,
@@ -141,6 +158,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1711248966255,
@@ -150,6 +169,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1712318484588,
@@ -159,6 +180,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1712571887668,
@@ -168,6 +191,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1712922752018,
@@ -177,6 +202,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1712978046047,
@@ -186,6 +213,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1713128248942,
@@ -195,6 +224,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1714007961216,
@@ -204,6 +235,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1714336513752,
@@ -213,6 +246,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1714369937241,
@@ -222,6 +257,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1714419410386,
@@ -231,6 +268,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1715013885258,
@@ -240,6 +279,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1715261297439,
@@ -249,6 +290,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1715376115620,
@@ -258,6 +301,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1715391342877,
@@ -267,6 +312,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1715767145661,
@@ -276,6 +323,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1715786420141,
@@ -285,6 +334,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1715796114254,
@@ -294,6 +345,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1716113126229,
@@ -303,6 +356,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1716942298284,
@@ -312,6 +367,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1716980514761,
@@ -321,6 +378,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1718155121538,
@@ -330,6 +389,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1718215699655,
@@ -339,6 +400,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1718782359698,
@@ -348,6 +411,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1718976382705,
@@ -357,6 +422,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1718981288928,
@@ -366,6 +433,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1719043283697,
@@ -375,6 +444,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1719332041816,
@@ -384,6 +455,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1719449217079,
@@ -393,6 +466,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1719479299076,
@@ -402,6 +477,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1719528528323,
@@ -411,6 +488,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1719618254364,
@@ -420,6 +499,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1720249624362,
@@ -429,6 +510,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1720286775588,
@@ -438,6 +521,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1720575069417,
@@ -447,6 +532,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1720582298083,
@@ -456,6 +543,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1721112537777,
@@ -465,6 +554,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1721265294356,
@@ -474,6 +565,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1721557916128,
@@ -483,6 +576,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1722029006613,
@@ -492,6 +587,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1722491149415,
@@ -501,6 +598,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1722543451615,
@@ -510,6 +609,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1722700378944,
@@ -519,6 +620,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1722854173318,
@@ -528,6 +631,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1723084073349,
@@ -537,6 +642,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1723775893354,
@@ -546,6 +653,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1724157190575,
@@ -555,6 +664,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1724326453391,
@@ -564,6 +675,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1724362147831,
@@ -573,6 +686,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1724453037801,
@@ -582,6 +697,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1725284777007,
@@ -591,6 +708,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1725356765722,
@@ -600,6 +719,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1725456127689,
@@ -609,6 +730,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1725702744427,
@@ -618,6 +741,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1725784284728,
@@ -627,6 +752,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1725927726621,
@@ -636,6 +763,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1726065992862,
@@ -645,6 +774,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1726210276347,
@@ -654,6 +785,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1726622724354,
@@ -663,6 +796,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1726776057211,
@@ -672,6 +807,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1727039155178,
@@ -681,6 +818,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1728011401525,
@@ -690,6 +829,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1728019992465,
@@ -699,6 +840,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1728220614179,
@@ -708,6 +851,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1728500507289,
@@ -717,6 +862,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1728571015939,
@@ -726,6 +873,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1729140288004,
@@ -735,6 +884,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1729496889602,
@@ -744,6 +895,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1729913704235,
@@ -753,6 +906,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1731106723296,
@@ -762,6 +917,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1731428705866,
@@ -771,6 +928,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1731520612299,
@@ -780,6 +939,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1731760059583,
@@ -789,6 +950,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1731818574190,
@@ -798,6 +961,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1731853957539,
@@ -807,6 +972,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1732148787944,
@@ -816,6 +983,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1733108814496,
@@ -825,6 +994,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1733378072235,
@@ -834,6 +1005,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1733575915358,
@@ -843,6 +1016,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1734195655098,
@@ -852,6 +1027,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1734307820032,
@@ -861,6 +1038,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1735115341818,
@@ -870,6 +1049,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1735257823710,
@@ -879,6 +1060,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1735419260679,
@@ -888,6 +1071,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1736029572892,
@@ -897,6 +1082,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1736165169999,
@@ -906,6 +1093,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1736276381535,
@@ -915,6 +1104,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1736299407926,
@@ -924,6 +1115,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1736444589106,
@@ -933,6 +1126,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1736658704065,
@@ -942,6 +1137,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1736718462902,
@@ -951,6 +1148,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1736723975631,
@@ -960,6 +1159,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1736728678501,
@@ -969,6 +1170,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1736823298811,
@@ -978,6 +1181,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1737216153455,
@@ -987,6 +1192,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1738108377038,
@@ -996,6 +1203,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1738200059769,
@@ -1005,6 +1214,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1738391643807,
@@ -1014,6 +1225,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1738662397698,
@@ -1023,6 +1236,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1738722731969,
@@ -1032,6 +1247,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1739510499271,
@@ -1041,6 +1258,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1739901468938,
@@ -1050,6 +1269,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1740426794547,
@@ -1059,6 +1280,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1740608769815,
@@ -1068,6 +1291,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1742073077130,
@@ -1077,6 +1302,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1742506206395,
@@ -1086,6 +1313,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1743278543275,
@@ -1095,6 +1324,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1743399292504,
@@ -1104,6 +1335,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1743698758423,
@@ -1113,6 +1346,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1744003055894,
@@ -1122,6 +1357,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1744521274089,
@@ -1131,6 +1368,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1744735796851,
@@ -1140,6 +1379,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1744901354994,
@@ -1149,6 +1390,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1744972841186,
@@ -1158,6 +1401,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1744998391084,
@@ -1167,6 +1412,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1745012754222,
@@ -1176,6 +1423,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1745063738289,
@@ -1185,6 +1434,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1745085683304,
@@ -1194,6 +1445,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1745233483479,
@@ -1203,6 +1456,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1745582001051,
@@ -1212,6 +1467,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1745813432739,
@@ -1221,6 +1478,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1747511468196,
@@ -1230,6 +1489,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1747958312598,
@@ -1239,6 +1500,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1747975230044,
@@ -1248,6 +1511,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1748009224304,
@@ -1257,6 +1522,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1748215362755,
@@ -1266,6 +1533,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1748268705804,
@@ -1275,6 +1544,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1748297246969,
@@ -1284,6 +1555,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1748336916796,
@@ -1293,6 +1566,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1748559700132,
@@ -1302,6 +1577,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1748846232938,
@@ -1311,6 +1588,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1749422370611,
@@ -1320,6 +1599,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1749635520555,
@@ -1329,6 +1610,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1750137675107,
@@ -1338,6 +1621,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1750852076521,
@@ -1347,6 +1632,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1750878009168,
@@ -1356,6 +1643,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1750931817977,
@@ -1365,6 +1654,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1751062079590,
@@ -1374,6 +1665,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1751117363459,
@@ -1383,6 +1676,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1751336368538,
@@ -1392,6 +1687,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1751448369664,
@@ -1401,6 +1698,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1751475437066,
@@ -1410,6 +1709,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1751649969231,
@@ -1419,6 +1720,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1751777944845,
@@ -1428,6 +1731,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1751854833781,
@@ -1437,6 +1742,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1752525158430,
@@ -1446,6 +1753,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1752578982025,
@@ -1455,6 +1764,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1752755368924,
@@ -1464,6 +1775,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1753774197414,
@@ -1473,6 +1786,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1754072575423,
@@ -1482,6 +1797,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1754100785292,
@@ -1491,6 +1808,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1754325955616,
@@ -1500,6 +1819,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1754691794445,
@@ -1509,6 +1830,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1755307553352,
@@ -1518,6 +1841,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1756153143052,
@@ -1527,6 +1852,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1756170186788,
@@ -1536,6 +1863,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1756298187891,
@@ -1545,6 +1874,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1756770468817,
@@ -1554,6 +1885,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1757135517967,
@@ -1563,6 +1896,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1757365650329,
@@ -1572,6 +1907,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1757560278309,
@@ -1581,6 +1918,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1757984755795,
@@ -1590,6 +1929,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1758406981878,
@@ -1599,6 +1940,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1759000210119,
@@ -1608,6 +1951,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1759026576025,
@@ -1617,6 +1962,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1759848613189,
@@ -1626,6 +1973,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1759903720068,
@@ -1635,6 +1984,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1760734755058,
@@ -1644,6 +1995,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1760813928133,
@@ -1653,6 +2006,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1760864005270,
@@ -1662,6 +2017,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1761182126003,
@@ -1671,6 +2028,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1761207664531,
@@ -1680,6 +2039,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1761443817926,
@@ -1689,6 +2050,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1761666474862,
@@ -1698,6 +2061,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1761780263102,
@@ -1707,6 +2072,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1761792944056,
@@ -1716,6 +2083,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1762012988348,
@@ -1725,6 +2094,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1762275923652,
@@ -1734,6 +2105,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1762479766448,
@@ -1743,6 +2116,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1762679202412,
@@ -1752,6 +2127,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1762750099589,
@@ -1761,6 +2138,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1763149853265,
@@ -1770,6 +2149,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1763310393681,
@@ -1779,6 +2160,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1763396900539,
@@ -1788,6 +2171,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1763509835735,
@@ -1797,6 +2182,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1763845658555,
@@ -1806,6 +2193,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1764032884843,
@@ -1815,6 +2204,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1764419200901,
@@ -1824,6 +2215,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1764423728468,
@@ -1833,6 +2226,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1764596209381,
@@ -1842,6 +2237,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1764606730563,
@@ -1851,6 +2248,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1765753683925,
@@ -1860,6 +2259,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1765793680257,
@@ -1869,6 +2270,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1765845631611,
@@ -1878,6 +2281,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1765920444426,
@@ -1887,6 +2292,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1766527752785,
@@ -1896,6 +2303,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1766765175121,
@@ -1905,6 +2314,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1766935286199,
@@ -1914,6 +2325,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1766992574136,
@@ -1923,6 +2336,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1767190931356,
@@ -1932,6 +2347,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1767226830493,
@@ -1941,6 +2358,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1767282310881,
@@ -1950,6 +2369,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1767298522119,
@@ -1959,6 +2380,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1768195777368,
@@ -1968,6 +2391,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1768598363418,
@@ -1977,6 +2402,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1769159332360,
@@ -1986,6 +2413,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1769188884943,
@@ -1995,6 +2424,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1769491807950,
@@ -2004,6 +2435,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1770748540121,
@@ -2013,6 +2446,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1770784261237,
@@ -2022,6 +2457,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1770825786162,
@@ -2031,6 +2468,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1770927836722,
@@ -2040,6 +2479,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1771516134181,
@@ -2049,6 +2490,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1771708357582,
@@ -2058,6 +2501,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1771916276466,
@@ -2067,6 +2512,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1773030935442,
@@ -2076,6 +2523,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1774139038461,
@@ -2085,6 +2534,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1774450847620,
@@ -2094,6 +2545,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1774466625747,
@@ -2103,6 +2556,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1774808647308,
@@ -2112,6 +2567,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1775178296093,
@@ -2121,6 +2578,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1775234662005,
@@ -2130,6 +2589,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1775703249588,
@@ -2139,6 +2600,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1775868084626,
@@ -2148,6 +2611,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1775951352411,
@@ -2157,6 +2622,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1776298869880,
@@ -2166,6 +2633,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1776356146085,
@@ -2175,6 +2644,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1776484655390,
@@ -2184,6 +2655,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1776504142147,
@@ -2193,6 +2666,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1776626545472,
@@ -2202,6 +2677,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1776692079773,
@@ -2211,6 +2688,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1776962456444,
@@ -2220,6 +2699,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1777470264881,
@@ -2229,6 +2710,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1778147595605,
@@ -2238,6 +2721,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1779064203780,
@@ -2247,6 +2732,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1779258427484,
@@ -2256,6 +2743,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1779537899666,
@@ -2265,6 +2754,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1779668646278,
@@ -2274,6 +2765,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1779818962113,
@@ -2283,6 +2776,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1780542504154,
@@ -2292,6 +2787,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1780639006826,
@@ -2301,6 +2798,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1780704556386,
@@ -2310,6 +2809,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1781264217908,
@@ -2319,6 +2820,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1781667751418,
@@ -2328,6 +2831,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1782864646444,
@@ -2337,6 +2842,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1783000680385,
@@ -2346,6 +2853,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1783119029118,
@@ -2355,6 +2864,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1783233777371,
@@ -2364,6 +2875,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1783913176577,
@@ -2373,6 +2886,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1783992192483,
@@ -2382,6 +2897,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1784145726879,
@@ -2391,6 +2908,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1784677488166,
@@ -2400,6 +2919,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1785139115552,
@@ -2409,6 +2930,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1785705350017,
@@ -2418,6 +2941,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1785771376550,
@@ -2427,6 +2952,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1785815277805,
@@ -2436,6 +2963,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1785890506677,
@@ -2445,6 +2974,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1785962927270,
@@ -2454,6 +2985,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1786233799328,
@@ -2463,6 +2996,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1786783422282,
@@ -2472,6 +3007,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1786869464385,
@@ -2481,6 +3018,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1787031491712,
@@ -2490,6 +3029,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1787126999895,
@@ -2499,6 +3040,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1787445879882,
@@ -2508,6 +3051,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1787690032661,
@@ -2517,6 +3062,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1788265074053,
@@ -2526,6 +3073,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1788401545399,
@@ -2535,6 +3084,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1788583967522,
@@ -2544,6 +3095,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1788984771103,
@@ -2553,6 +3106,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1789520085290,
@@ -2562,6 +3117,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1789693578427,
@@ -2571,6 +3128,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1789870903170,
@@ -2580,6 +3139,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1789933808694,
@@ -2589,6 +3150,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1790107281655,
@@ -2598,6 +3161,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1790255635373,
@@ -2607,6 +3172,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1790867406136,
@@ -2616,6 +3183,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1790874492227,
@@ -2625,6 +3194,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1791551163729,
@@ -2634,6 +3205,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1791775565400,
@@ -2643,6 +3216,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1791832165524,
@@ -2652,6 +3227,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1792202444801,
@@ -2661,6 +3238,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1792304055916,
@@ -2670,6 +3249,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1792385389656,
@@ -2679,6 +3260,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1792589878047,
@@ -2688,6 +3271,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1792795614381,
@@ -2697,6 +3282,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1792800606010,
@@ -2706,6 +3293,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1793055472508,
@@ -2715,6 +3304,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1793239699425,
@@ -2724,6 +3315,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1793364086698,
@@ -2733,6 +3326,8 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
   {
     startDate: 1793477161376,
@@ -2742,5 +3337,7 @@ const data = [
     successorMwos: [],
     connectionsAsStart: [],
     connectionsAsEnd: [],
+    minCol: Number.NEGATIVE_INFINITY,
+    maxCol: Number.POSITIVE_INFINITY,
   },
 ];
