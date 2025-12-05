@@ -252,6 +252,8 @@ function onScrollWrapperMouseDown(event) {
   const [r, g, b] = data;
   const color = `rgb(${r} ${g} ${b})`;
 
+  console.log(matrix[indexY][indexX]);
+
   // start drag
   if (color === MWO_COLOR) {
     dragIndexX = indexX;
@@ -352,28 +354,38 @@ addEventListener("mouseup", (event) => {
   if (drag) {
     const { indexX } = getIndicesFromEvent(event);
     clearInterval(timer);
+    matrix[dragIndexY][dragIndexX].drag = false;
 
-    try {
-      matrix[dragIndexY][dragIndexX].drag = false;
-
+    if (!outOfBounds) {
       if (indexX !== dragIndexX) {
         const mwo = matrix[dragIndexY][dragIndexX];
-        mwo.startDate = new Date(dates[indexX]);
         matrix[dragIndexY][indexX] = mwo;
         matrix[dragIndexY][dragIndexX] = null;
 
-        connections = connections.map((c) => {
-          if (c.codeStart === mwo.code) {
-            c.startIndexX = indexX;
-          }
-          if (c.endeCode === mwo.code) {
-            c.codeEnd = indexX;
-          }
+        mwo.startDate = new Date(dates[indexX]);
+        for (let i = 0; i < mwo.connectionsAsStart.length; i++) {
+          mwo.connectionsAsStart[i].startIndexX = indexX;
+        }
 
-          return c;
-        });
+        for (let i = 0; i < mwo.connectionsAsEnd.length; i++) {
+          mwo.connectionsAsEnd[i].endIndexX = indexX;
+        }
+
+        for (let i = 0; i < mwo.predecessorMwos.length; i++) {
+          mwo.predecessorMwos[i].maxCol = Math.max(
+            mwo.predecessorMwos[i].maxCol,
+            indexX - 1
+          );
+        }
+
+        for (let i = 0; i < mwo.successorMwos.length; i++) {
+          mwo.successorMwos[i].minCol = Math.min(
+            mwo.successorMwos[i].minCol,
+            indexX + 1
+          );
+        }
       }
-    } catch (error) {}
+    }
 
     drag = false;
     requestAnimationFrame(render);
@@ -384,34 +396,37 @@ addEventListener("mouseup", (event) => {
     const [r, g, b] = data;
     const color = `rgb(${r} ${g} ${b})`;
 
+    // EnSt
     if (color === DRAG_ANCHOR_FRONT_COLOR) {
       // connected with another mwo
       const { indexX: connectionEndIndexX, indexY: connectionEndIndexY } =
         getIndicesFromEvent(event);
 
-      matrix[connectionStartIndexY][connectionStartIndexX].maxCol = Math.min(
-        matrix[connectionStartIndexY][connectionStartIndexX].maxCol,
+      const predecessor = matrix[connectionStartIndexY][connectionStartIndexX];
+      const successor = matrix[connectionEndIndexY][connectionEndIndexX];
+
+      predecessor.maxCol = Math.min(
+        predecessor.maxCol,
         connectionEndIndexX - 1
       );
 
-      matrix[connectionEndIndexY][connectionEndIndexX].minCol = Math.max(
-        matrix[connectionEndIndexY][connectionEndIndexX].minCol,
-        connectionStartIndexX + 1
-      );
+      successor.minCol = Math.max(successor.minCol, connectionStartIndexX + 1);
 
-      connections.push({
+      const connection = {
         startIndexX: connectionStartIndexX,
         startIndexY: connectionStartIndexY,
         endIndexX: connectionEndIndexX,
         endIndexY: connectionEndIndexY,
-        codeStart: matrix[connectionStartIndexY][connectionStartIndexX].code,
-        codeEnd: matrix[connectionEndIndexY][connectionEndIndexX].code,
-      });
-    }
+      };
 
-    try {
-      matrix[connectionStartIndexY][connectionStartIndexX].connection = false;
-    } catch (error) {}
+      predecessor.successorMwos.push(successor);
+      predecessor.connectionsAsStart.push(connection);
+
+      successor.predecessorMwos.push(predecessor);
+      successor.connectionsAsEnd.push(connection);
+
+      connections.push(connection);
+    }
 
     connectionMode = false;
     requestAnimationFrame(render);
