@@ -50,6 +50,10 @@
         height: 50px;
         z-index: 2;
       }
+
+      #radiogroup {
+        margin-top: 20px;
+      }
     </style>
   </head>
   <body>
@@ -71,6 +75,17 @@
         <div id="gantt-virtual-size"></div>
       </div>
     </div>
+    <form id="radiogroup">
+      <label>
+        <input type="radio" value="day" name="view" checked />
+        Day
+      </label>
+      <label> <input type="radio" value="week" name="view" /> Week </label>
+      <label>
+        <input type="radio" value="month" name="view" />
+        Month
+      </label>
+    </form>
     <script src="data.js"></script>
     <script src="gantt.js"></script>
   </body>

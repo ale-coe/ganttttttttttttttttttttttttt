@@ -21,6 +21,7 @@ const getCodes = (items) => {
  * Performance Ideas do batches of cols, mwo, text so that the ctx.fillStyle doesnt need to be changed that often
  */
 const render = () => {
+  // if month / week MWO needs to be rendered even if startIndex of MWO is out of bounds
   const scrollIndexX = Math.floor(scrollWrapper.scrollLeft / COL_WIDTH);
   const scrollIndexY = Math.floor(scrollWrapper.scrollTop / ROW_HEIGHT);
 
@@ -52,15 +53,15 @@ const render = () => {
       (height < ROW_HEIGHT ? y - (ROW_HEIGHT - height) : y) + 15
     );
 
+    let firstElementData = null;
     // render dates and blocks
-    for (let j = scrollIndexX; j < Math.min(endCol, dates.length); j++) {
+    for (let j = scrollIndexX; j < Math.min(endCol, xLabels.length); j++) {
       const x =
         j === scrollIndexX
           ? COL_WIDTH * (j - scrollIndexX) + X_OFFSET
           : COL_WIDTH * (j - scrollIndexX) +
             X_OFFSET -
             (scrollWrapper.scrollLeft % COL_WIDTH);
-      // TODO1: height (for codes)
       const width =
         scrollWrapper.scrollLeft % COL_WIDTH && j === scrollIndexX
           ? COL_WIDTH - (scrollWrapper.scrollLeft % COL_WIDTH)
@@ -68,40 +69,44 @@ const render = () => {
 
       if (!datesPrinted) {
         ctx.fillStyle = TEXT_COLOR;
-        ctx.fillText(
-          dates[j],
-          width < COL_WIDTH ? x - (COL_WIDTH - width) : x, // if not enough width, set start to negative value since container for text cannot really shrink
-          Y_OFFSET - 10
-        );
+        let virtualLabelIndex =
+          VIEW === "day" ? j : LABEL_ARR.indexOf(xLabels[j]);
 
-        ctx.fillStyle = j % 2 ? SECOND_COL_COLOR : FIRST_COL_COLOR;
+        // always true for day, necessary for week/month
+        if (xLabels[j] !== xLabels[j - 1]) {
+          ctx.fillText(
+            xLabels[j],
+            width < COL_WIDTH ? x - (COL_WIDTH - width) : x, // if not enough width, set start to negative value since container for text cannot really shrink
+            Y_OFFSET - 10
+          );
+        }
+
+        ctx.fillStyle =
+          virtualLabelIndex % 2 ? SECOND_COL_COLOR : FIRST_COL_COLOR;
+        // draw one big rect instead of several small ones... for month/week
         ctx.fillRect(x, Y_OFFSET, width, 750);
+
+        const element = getElement(j, i);
+        if (element) {
+          firstElementData = { element: getElement(j, i), x, width };
+        }
+        continue;
       }
 
       const element = getElement(j, i);
-      if (element) {
-        ctx.fillStyle = element.drag
-          ? DRAGGED_MWO_PLACEHOLDER_COLOR
-          : MWO_COLOR;
-        ctx.fillRect(x, y, width, height);
 
-        // only render anchors if mwo has full height
-        if (!drag && height === ROW_HEIGHT) {
-          if (width === COL_WIDTH) {
-            ctx.beginPath();
-            ctx.fillStyle = DRAG_ANCHOR_FRONT_COLOR;
-            ctx.arc(x + 5, y + 10, 5, 0, Math.PI * 2);
-            ctx.fill();
-          }
+      if (element) renderElement(element, x, y, width, height);
+    }
 
-          if (width >= 10) {
-            ctx.beginPath();
-            ctx.fillStyle = DRAG_ANCHOR_BACK_COLOR;
-            ctx.arc(x + 5 + width - 10, y + 10, 5, 0, Math.PI * 2);
-            ctx.fill();
-          }
-        }
-      }
+    // render first element after render of columns, since mwo would be covered by column
+    if (firstElementData) {
+      renderElement(
+        firstElementData.element,
+        firstElementData.x,
+        y,
+        firstElementData.width,
+        height
+      );
     }
 
     datesPrinted = true;
@@ -135,7 +140,7 @@ const render = () => {
     ctx.fillRect(
       x,
       ROW_HEIGHT * dragIndexY - scrollWrapper.scrollTop + Y_OFFSET,
-      COL_WIDTH,
+      MWO_WIDTH,
       ROW_HEIGHT
     );
   }
@@ -180,6 +185,35 @@ const render = () => {
     }
 
     ctx.stroke();
+  }
+};
+
+const renderElement = (element, x, y, width, height) => {
+  ctx.fillStyle = element.drag ? DRAGGED_MWO_PLACEHOLDER_COLOR : MWO_COLOR;
+  // for day
+  // const realMwoWidth = width === MWO_WIDTH ? MWO_WIDTH : width;
+  // for month
+  const realMwoWidth = MWO_WIDTH;
+  ctx.fillRect(x, y, realMwoWidth, height);
+
+  // only render anchors if mwo has full height
+  if (!drag && height === ROW_HEIGHT) {
+    console.log(width);
+    if (realMwoWidth === MWO_WIDTH) {
+      ctx.beginPath();
+      ctx.fillStyle = "blue";
+      // ctx.fillStyle = DRAG_ANCHOR_FRONT_COLOR;
+      ctx.arc(x + 5, y + 10, 5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    if (realMwoWidth >= 10) {
+      ctx.beginPath();
+      ctx.fillStyle = "red";
+      // ctx.fillStyle = DRAG_ANCHOR_BACK_COLOR;
+      ctx.arc(x + 5 + realMwoWidth - 10, y + 10, 5, 0, Math.PI * 2);
+      ctx.fill();
+    }
   }
 };
 
@@ -416,12 +450,16 @@ addEventListener("mouseup", (event) => {
     if (!outOfBounds) {
       const { indexX } = getIndicesFromEvent(event);
 
-      if (indexX !== dragIndexX && indexX >= 0 && indexX <= dates.length - 1) {
+      if (
+        indexX !== dragIndexX &&
+        indexX >= 0 &&
+        indexX <= xLabels.length - 1
+      ) {
         const mwo = getElement(dragIndexX, dragIndexY);
         setElement(indexX, dragIndexY, mwo);
         deleteElement(dragIndexX, dragIndexY);
 
-        mwo.startDate = new Date(dates[indexX]);
+        mwo.startDate = new Date(xLabels[indexX]);
         for (let i = 0; i < mwo.connectionsAsStart.length; i++) {
           mwo.connectionsAsStart[i].startIndexX = indexX;
         }
@@ -501,6 +539,26 @@ addEventListener("keydown", (event) => {
   }
 });
 
+document.querySelector("#radiogroup").addEventListener("change", (e) => {
+  if (e.target.value === "day") {
+    COL_WIDTH = COL_WIDTH_DAY;
+    xLabels = [...days];
+  } else if (e.target.value === "week") {
+    xLabels = days.map((d) => getCalendarWeek(d));
+    COL_WIDTH = COL_WIDTH_DAY_WEEK;
+  } else if (e.target.value === "month") {
+    xLabels = days.map((d) => d.slice(0, 7));
+    COL_WIDTH = COL_WIDTH_DAY_MONTH;
+  }
+
+  LABEL_ARR = Array.from(new Set(xLabels));
+  VIEW = e.target.value;
+  virtualSize.style.height = `${codes.length * ROW_HEIGHT}px`;
+  virtualSize.style.width = `${xLabels.length * COL_WIDTH}px`;
+
+  requestAnimationFrame(render);
+});
+
 const addConnection = (
   connectionStartIndexX,
   connectionStartIndexY,
@@ -562,6 +620,24 @@ const getColorFromEventPosition = (event) => {
   return `rgb(${r} ${g} ${b})`;
 };
 
+const getCalendarWeek = (date) => {
+  const d = new Date(date);
+
+  // ISO week date weeks start on Monday (1 = Monday, 7 = Sunday)
+  const dayNum = d.getUTCDay() || 7; // Sunday should be 7, not 0
+
+  // Shift date to Thursday of this week → ISO rules
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+
+  // Start of the year
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+
+  // ISO week number
+  const weekNum = Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
+
+  return `${d.getUTCFullYear()}-${weekNum}`;
+};
+
 const FIRST_COL_COLOR = `rgb(255 255 255)`;
 const SECOND_COL_COLOR = `rgb(155 155 155)`;
 const TEXT_COLOR = `rgb(0 0 0)`;
@@ -576,7 +652,13 @@ const SCROLL_SPEED = 50;
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const ROW_HEIGHT = 20;
-const COL_WIDTH = 60;
+const MWO_WIDTH = 60;
+const COL_WIDTH_DAY = 60;
+const COL_WIDTH_DAY_WEEK = 30;
+const COL_WIDTH_DAY_MONTH = 10;
+let VIEW = "day";
+
+let COL_WIDTH = COL_WIDTH_DAY;
 const CANVAS_HEIGHT = 800;
 const CANVAS_WIDTH = 1200;
 const Y_OFFSET = 50;
@@ -590,8 +672,15 @@ ctx.font = "10px Arial";
 
 const items = getData() || generateItems(300);
 const codes = getCodes(items);
-const dates = getDates(items);
-const startDate = dates[0];
+
+const days = getDates(items);
+
+let xLabels = [...days];
+const endDate = xLabels[xLabels.length - 1];
+const startDate = xLabels[0];
+
+let LABEL_ARR = [];
+
 const matrix = {};
 let connections = [];
 
@@ -618,7 +707,7 @@ for (let i = 0; i < items.length; i++) {
 }
 
 virtualSize.style.height = `${codes.length * ROW_HEIGHT}px`;
-virtualSize.style.width = `${dates.length * COL_WIDTH}px`;
+virtualSize.style.width = `${xLabels.length * COL_WIDTH}px`;
 
 // add test values -------------------------------------------------------------------------
 // const testConnections = [
@@ -631,6 +720,13 @@ virtualSize.style.width = `${dates.length * COL_WIDTH}px`;
 // for (const testConnection of testConnections) {
 //   addConnection(...testConnection);
 // }
+// document.querySelector("input[value='week']").checked = true;
+// document
+//   .querySelector("input[value='week']")
+//   .dispatchEvent(new Event("change", { bubbles: true }));
 // add te st values -------------------------------------------------------------------------
 
 render();
+
+// next steps:
+// render MWO for month/week correctly if only part is visible, drag
