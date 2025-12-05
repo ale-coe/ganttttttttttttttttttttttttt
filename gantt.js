@@ -191,26 +191,25 @@ const render = () => {
 const renderElement = (element, x, y, width, height) => {
   ctx.fillStyle = element.drag ? DRAGGED_MWO_PLACEHOLDER_COLOR : MWO_COLOR;
   // for day
-  // const realMwoWidth = width === MWO_WIDTH ? MWO_WIDTH : width;
+  const realMwoWidth = width === MWO_WIDTH ? MWO_WIDTH : width;
   // for month
-  const realMwoWidth = MWO_WIDTH;
+  // const realMwoWidth = MWO_WIDTH;
   ctx.fillRect(x, y, realMwoWidth, height);
 
   // only render anchors if mwo has full height
   if (!drag && height === ROW_HEIGHT) {
-    console.log(width);
     if (realMwoWidth === MWO_WIDTH) {
       ctx.beginPath();
-      ctx.fillStyle = "blue";
-      // ctx.fillStyle = DRAG_ANCHOR_FRONT_COLOR;
+      // ctx.fillStyle = "blue";
+      ctx.fillStyle = DRAG_ANCHOR_FRONT_COLOR;
       ctx.arc(x + 5, y + 10, 5, 0, Math.PI * 2);
       ctx.fill();
     }
 
     if (realMwoWidth >= 10) {
       ctx.beginPath();
-      ctx.fillStyle = "red";
-      // ctx.fillStyle = DRAG_ANCHOR_BACK_COLOR;
+      // ctx.fillStyle = "red";
+      ctx.fillStyle = DRAG_ANCHOR_BACK_COLOR;
       ctx.arc(x + 5 + realMwoWidth - 10, y + 10, 5, 0, Math.PI * 2);
       ctx.fill();
     }
@@ -343,8 +342,11 @@ function onScrollWrapperMouseDown(event) {
 
       if (xOverlap && yOverlap) {
         const points = getPoints(connection);
+        if (!points) {
+          continue;
+        }
+
         for (let i = 0; i < points.length - 1; i++) {
-          // delete here
           const start = points[i];
           const end = points[i + 1];
 
@@ -361,15 +363,34 @@ function onScrollWrapperMouseDown(event) {
               connection.startIndexX,
               connection.startIndexY
             );
-
-            startElement.connectionsAsStart.filter(
-              (c) => c.id !== connectionId
-            );
             const endElement = getElement(
               connection.endIndexX,
               connection.endIndexY
             );
+
+            startElement.successorMwos = startElement.successorMwos.filter(
+              (mwo) => mwo !== endElement
+            );
+            startElement.connectionsAsStart.filter(
+              (c) => c.id !== connectionId
+            );
+            startElement.maxCol =
+              Math.min(
+                ...startElement.successorMwos.map((e) =>
+                  getXIndexFromDate(e.startDate)
+                )
+              ) - 1;
+
+            endElement.predecessorMwos = endElement.predecessorMwos.filter(
+              (mwo) => mwo !== startElement
+            );
             endElement.connectionsAsEnd.filter((c) => c.id !== connectionId);
+            endElement.minCol =
+              Math.max(
+                ...endElement.predecessorMwos.map((e) =>
+                  getXIndexFromDate(e.startDate)
+                )
+              ) + 1;
           }
         }
       }
@@ -710,13 +731,29 @@ virtualSize.style.height = `${codes.length * ROW_HEIGHT}px`;
 virtualSize.style.width = `${xLabels.length * COL_WIDTH}px`;
 
 // add test values -------------------------------------------------------------------------
-// const testConnections = [
-//   [6, 2, 9, 4],
-//   [6, 3, 9, 4],
-//   [5, 1, 9, 4],
-//   [5, 1, 13, 5],
-// ];
+const testConnections = [
+  // [6, 2, 9, 4],
+  // [6, 3, 9, 4],
+  // [5, 1, 9, 4],
+  // [5, 1, 13, 5],
+];
 
+// for (let i = 0; i < items.length; i++) {
+//   const elem = items[i];
+//   const indexX = getXIndexFromDate(elem.startDate);
+
+//   for (let j = i + 1; j < items.length; j++) {
+//     const _elem = items[j];
+//     const _indexX = getXIndexFromDate(_elem.startDate);
+//     if (_indexX > indexX + 2) {
+//       testConnections.push([indexX, i, _indexX, j]);
+//     }
+//     // const elem = items[i];
+//     // const
+//   }
+// }
+
+// console.log(testConnections.length);
 // for (const testConnection of testConnections) {
 //   addConnection(...testConnection);
 // }
