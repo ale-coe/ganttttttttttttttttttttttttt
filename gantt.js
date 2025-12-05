@@ -29,12 +29,28 @@ const render = () => {
   const endCol =
     scrollIndexX + Math.ceil((canvas.width - X_OFFSET) / COL_WIDTH) + 1;
   const endRow =
-    scrollIndexY + Math.ceil((canvas.height - 50) / ROW_HEIGHT) + 1;
+    scrollIndexY + Math.ceil((canvas.height - Y_OFFSET) / ROW_HEIGHT) + 1;
   let datesPrinted = false;
   // render codes
   for (let i = scrollIndexY; i < Math.min(endRow, codes.length); i++) {
+    const y =
+      i === scrollIndexY
+        ? ROW_HEIGHT * (i - scrollIndexY) + Y_OFFSET
+        : ROW_HEIGHT * (i - scrollIndexY) +
+          Y_OFFSET -
+          (scrollWrapper.scrollTop % ROW_HEIGHT);
+    const height =
+      scrollWrapper.scrollTop % ROW_HEIGHT && i === scrollIndexY
+        ? ROW_HEIGHT - (scrollWrapper.scrollTop % ROW_HEIGHT)
+        : ROW_HEIGHT;
+
+    // + 15 to push it to the middle
     ctx.fillStyle = TEXT_COLOR;
-    ctx.fillText(codes[i], 2, ROW_HEIGHT * (i - scrollIndexY) + Y_OFFSET);
+    ctx.fillText(
+      codes[i],
+      2,
+      (height < ROW_HEIGHT ? y - (ROW_HEIGHT - height) : y) + 15
+    );
 
     // render dates and blocks
     for (let j = scrollIndexX; j < Math.min(endCol, dates.length); j++) {
@@ -55,16 +71,11 @@ const render = () => {
         ctx.fillText(
           dates[j],
           width < COL_WIDTH ? x - (COL_WIDTH - width) : x, // if not enough width, set start to negative value since container for text cannot really shrink
-          40
+          Y_OFFSET - 10
         );
 
-        if (j % 2) {
-          ctx.fillStyle = SECOND_COL_COLOR;
-        } else {
-          ctx.fillStyle = FIRST_COL_COLOR;
-        }
-
-        ctx.fillRect(x, 50, width, 750);
+        ctx.fillStyle = j % 2 ? SECOND_COL_COLOR : FIRST_COL_COLOR;
+        ctx.fillRect(x, Y_OFFSET, width, 750);
       }
 
       const row = matrix[i];
@@ -73,37 +84,21 @@ const render = () => {
         ctx.fillStyle = element.drag
           ? DRAGGED_MWO_PLACEHOLDER_COLOR
           : MWO_COLOR;
-        ctx.fillRect(
-          x,
-          ROW_HEIGHT * (i - scrollIndexY) + Y_OFFSET - 9,
-          width,
-          ROW_HEIGHT
-        );
+        ctx.fillRect(x, y, width, height);
 
-        if (!drag) {
+        // only render anchors if mwo has full height
+        if (!drag && height === ROW_HEIGHT) {
           if (width === COL_WIDTH) {
             ctx.beginPath();
             ctx.fillStyle = DRAG_ANCHOR_FRONT_COLOR;
-            ctx.arc(
-              x + 5,
-              ROW_HEIGHT * (i - scrollIndexY) + Y_OFFSET - 9 + 10,
-              5,
-              0,
-              Math.PI * 2
-            );
+            ctx.arc(x + 5, y + 10, 5, 0, Math.PI * 2);
             ctx.fill();
           }
 
           if (width >= 10) {
             ctx.beginPath();
             ctx.fillStyle = DRAG_ANCHOR_BACK_COLOR;
-            ctx.arc(
-              x + 5 + width - 10,
-              ROW_HEIGHT * (i - scrollIndexY) + Y_OFFSET - 9 + 10,
-              5,
-              0,
-              Math.PI * 2
-            );
+            ctx.arc(x + 5 + width - 10, y + 10, 5, 0, Math.PI * 2);
             ctx.fill();
           }
         }
@@ -139,7 +134,7 @@ const render = () => {
     ctx.fillStyle = DRAGGED_MWO_COLOR;
     ctx.fillRect(
       x,
-      ROW_HEIGHT * dragIndexY + Y_OFFSET - scrollWrapper.scrollTop - 9,
+      ROW_HEIGHT * dragIndexY - scrollWrapper.scrollTop + Y_OFFSET,
       COL_WIDTH,
       ROW_HEIGHT
     );
@@ -155,7 +150,10 @@ const render = () => {
       X_OFFSET;
 
     const connectionStartY =
-      connectionStartIndexY * ROW_HEIGHT + 10 - scrollWrapper.scrollTop + 50;
+      connectionStartIndexY * ROW_HEIGHT +
+      10 -
+      scrollWrapper.scrollTop +
+      Y_OFFSET;
 
     // TODO1: use linear equation to make it better
     // TODO1: check if /0 -> NaN/Infinity
@@ -167,7 +165,7 @@ const render = () => {
 
     // more of a heuristic
     const _connectionStartX = Math.max(connectionStartX, X_OFFSET);
-    const _connectionStartY = Math.max(connectionStartY, 50);
+    const _connectionStartY = Math.max(connectionStartY, Y_OFFSET);
     ctx.beginPath();
     ctx.moveTo(_connectionStartX, _connectionStartY);
     ctx.lineTo(connectionEndX, connectionEndY);
@@ -184,8 +182,8 @@ const drawConnection = (connection) => {
       X_OFFSET
     ),
     y: Math.max(
-      startIndexY * ROW_HEIGHT - scrollWrapper.scrollTop + 10 + 50,
-      50
+      startIndexY * ROW_HEIGHT - scrollWrapper.scrollTop + 10 + Y_OFFSET,
+      Y_OFFSET
     ),
   };
 
@@ -194,7 +192,10 @@ const drawConnection = (connection) => {
       endIndexX * COL_WIDTH - scrollWrapper.scrollLeft + X_OFFSET,
       X_OFFSET
     ),
-    y: Math.max(endIndexY * ROW_HEIGHT - scrollWrapper.scrollTop + 10 + 50, 50),
+    y: Math.max(
+      endIndexY * ROW_HEIGHT - scrollWrapper.scrollTop + 10 + Y_OFFSET,
+      Y_OFFSET
+    ),
   };
 
   if (start.x === end.x || start.y === endIndexY) {
@@ -218,14 +219,13 @@ function onScroll() {
 }
 
 function onCanvasClick(event) {
-  if (event.clientY < 50 || event.clientX > 90) {
+  if (event.clientY < Y_OFFSET || event.clientX > 90) {
     return;
   }
 
-  const indexY =
-    Math.floor(
-      (event.clientY - Y_OFFSET + scrollWrapper.scrollTop) / ROW_HEIGHT
-    ) + 1;
+  const indexY = Math.floor(
+    (event.clientY - Y_OFFSET + scrollWrapper.scrollTop) / ROW_HEIGHT
+  );
   const item = items[indexY];
   const indexX = Math.floor(
     (item.startDate - new Date(startDate).getTime()) / MS_PER_DAY
@@ -241,11 +241,11 @@ function onContextMenu(event) {
 
 function onScrollWrapperMouseDown(event) {
   const indexX = Math.floor(
-    (event.clientX - X_OFFSET + scrollWrapper.scrollLeft) / COL_WIDTH
+    (event.clientX + scrollWrapper.scrollLeft - X_OFFSET) / COL_WIDTH
   );
 
   const indexY = Math.floor(
-    (event.clientY + scrollWrapper.scrollTop - 50) / ROW_HEIGHT
+    (event.clientY + scrollWrapper.scrollTop - Y_OFFSET) / ROW_HEIGHT
   );
 
   const { data } = ctx.getImageData(event.clientX, event.clientY, 1, 1);
@@ -263,7 +263,7 @@ function onScrollWrapperMouseDown(event) {
     ctx.fillStyle = DRAGGED_MWO_PLACEHOLDER_COLOR;
     ctx.fillRect(
       COL_WIDTH * indexX + X_OFFSET - scrollWrapper.scrollLeft,
-      ROW_HEIGHT * indexY + Y_OFFSET - scrollWrapper.scrollTop - 9,
+      ROW_HEIGHT * indexY + Y_OFFSET - scrollWrapper.scrollTop,
       COL_WIDTH,
       ROW_HEIGHT
     );
@@ -303,7 +303,7 @@ addEventListener("mousemove", (event) => {
           return;
         }
         scrollWrapper.scrollLeft += COL_WIDTH;
-      }, 50);
+      }, SCROLL_SPEED);
     } else if (
       !outOfBounds &&
       event.clientX > X_OFFSET &&
@@ -315,7 +315,7 @@ addEventListener("mousemove", (event) => {
       }
       timer = setInterval(() => {
         scrollWrapper.scrollLeft -= COL_WIDTH;
-      }, 50);
+      }, SCROLL_SPEED);
     }
   }
 
@@ -331,21 +331,21 @@ addEventListener("mousemove", (event) => {
     if (event.clientX > 1150 && event.clientX < 1200) {
       timer = setInterval(() => {
         scrollWrapper.scrollLeft += COL_WIDTH;
-      }, 50);
+      }, SCROLL_SPEED);
     } else if (event.clientX > X_OFFSET && event.clientX < 150) {
       timer = setInterval(() => {
         scrollWrapper.scrollLeft -= COL_WIDTH;
-      }, 50);
+      }, SCROLL_SPEED);
     } else if (event.clientY > 750 && event.clientY < 800) {
       timer = setInterval(() => {
         // I know COL_WIDTH although ROW
         scrollWrapper.scrollTop += COL_WIDTH;
-      }, 50);
-    } else if (event.clientY > 50 && event.clientY < 100) {
+      }, SCROLL_SPEED);
+    } else if (event.clientY > Y_OFFSET && event.clientY < 100) {
       timer = setInterval(() => {
         // I know COL_WIDTH although ROW
         scrollWrapper.scrollTop -= COL_WIDTH;
-      }, 50);
+      }, SCROLL_SPEED);
     }
   }
 });
@@ -435,10 +435,10 @@ addEventListener("mouseup", (event) => {
 
 const getIndicesFromEvent = (event) => {
   const indexX = Math.floor(
-    (event.clientX - X_OFFSET + scrollWrapper.scrollLeft) / COL_WIDTH
+    (event.clientX + scrollWrapper.scrollLeft - X_OFFSET) / COL_WIDTH
   );
   const indexY = Math.floor(
-    (event.clientY + scrollWrapper.scrollTop - 50) / ROW_HEIGHT
+    (event.clientY + scrollWrapper.scrollTop - Y_OFFSET) / ROW_HEIGHT
   );
 
   return { indexX, indexY };
@@ -454,12 +454,14 @@ const DRAGGED_MWO_COLOR = `rgb(0 0 255)`;
 const DRAGGED_MWO_PLACEHOLDER_COLOR = `rgb(255 0 0)`;
 const CONNECTION_LINE_COLOR = `rgb(3 3 3)`;
 
+const SCROLL_SPEED = 50;
+
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const ROW_HEIGHT = 20;
 const COL_WIDTH = 60;
 const CANVAS_HEIGHT = 800;
 const CANVAS_WIDTH = 1200;
-const Y_OFFSET = 60;
+const Y_OFFSET = 50;
 const X_OFFSET = 100;
 
 const virtualSize = document.querySelector("#gantt-virtual-size");
