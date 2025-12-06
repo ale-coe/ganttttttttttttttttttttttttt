@@ -222,7 +222,10 @@ const getPoints = (connection) => {
 
   const start = {
     x: Math.max(
-      startIndexX * COL_WIDTH - scrollWrapper.scrollLeft + COL_WIDTH + X_OFFSET,
+      startIndexX * COL_WIDTH -
+        scrollWrapper.scrollLeft +
+        (MWO_WIDTH / COL_WIDTH) * COL_WIDTH + // account for relation between col and mwo width (important for week and month)
+        X_OFFSET,
       X_OFFSET
     ),
     y: Math.max(
@@ -286,6 +289,16 @@ function onContextMenu(event) {
   event.preventDefault();
 }
 
+/**
+ * if week/month "real" index is different from index derived by event
+ */
+const getRealIndicesFromEvent = (event) => {
+  const { indexX, indexY } = getIndicesFromEvent(event);
+  if (VIEW === "day") return { realIndexX: indexX, realIndexY: indexY };
+
+  return { realIndexX: items[indexY].startIndexX, realIndexY: indexY };
+};
+
 function onScrollWrapperMouseDown(event) {
   // right click
   if (event.button === 2) {
@@ -316,7 +329,8 @@ function onScrollWrapperMouseDown(event) {
   if (color === DRAG_ANCHOR_BACK_COLOR) {
     connectionMode = true;
 
-    connectionIndicators.push([indexX, indexY]);
+    const { realIndexX, realIndexY } = getRealIndicesFromEvent(event);
+    connectionIndicators.push([indexX, indexY, realIndexX, realIndexY]);
   }
 
   // delete connections
@@ -533,12 +547,15 @@ addEventListener("mouseup", (event) => {
         getIndicesFromEvent(event);
 
       for (const [
-        connectionStartIndexX,
-        connectionStartIndexY,
+        ,
+        ,
+        connectionStartRealIndexX,
+        connectionStartRealIndexY,
       ] of connectionIndicators) {
+        console.log(connectionStartRealIndexX, connectionStartRealIndexY);
         addConnection(
-          connectionStartIndexX,
-          connectionStartIndexY,
+          connectionStartRealIndexX,
+          connectionStartRealIndexY,
           connectionEndIndexX,
           connectionEndIndexY
         );
@@ -562,7 +579,9 @@ addEventListener("keydown", (event) => {
 
     if (color === DRAG_ANCHOR_BACK_COLOR) {
       const { indexX, indexY } = getIndicesFromEvent(_event);
-      connectionIndicators.push([indexX, indexY]);
+
+      const { realIndexX, realIndexY } = getRealIndicesFromEvent(_event);
+      connectionIndicators.push([indexX, indexY, realIndexX, realIndexY]);
     }
   }
 });
@@ -788,16 +807,16 @@ const testConnections = [
 // }
 
 // console.log(testConnections.length);
-// for (const testConnection of testConnections) {
-//   addConnection(...testConnection);
-// }
-// document.querySelector("input[value='week']").checked = true;
-// document
-//   .querySelector("input[value='week']")
-//   .dispatchEvent(new Event("change", { bubbles: true }));
+for (const testConnection of testConnections) {
+  addConnection(...testConnection);
+}
+document.querySelector("input[value='week']").checked = true;
+document
+  .querySelector("input[value='week']")
+  .dispatchEvent(new Event("change", { bubbles: true }));
 // FOR TESTING PURPOSES -------------------------------------------------------------------------
 
 render();
 
 // next steps:
-// drag, connection
+// drag, remove all magic numbers, performance issues
