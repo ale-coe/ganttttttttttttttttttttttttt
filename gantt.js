@@ -1,7 +1,7 @@
 const getDates = (items) => {
   const dates = [];
-  const startDate = items[0].startDate - 0 * MS_PER_DAY;
-  const endDate = items[items.length - 1].startDate + 30 * MS_PER_DAY;
+  const startDate = items[0].startDate - START_OFFSET * MS_PER_DAY;
+  const endDate = items[items.length - 1].startDate + END_OFFSET * MS_PER_DAY;
 
   let date = startDate;
   while (date < endDate) {
@@ -50,11 +50,10 @@ const render = () => {
 
     rowMap[i] = { y, height };
 
-    // + 15 to push it to the middle
     ctx.fillText(
       codes[i],
-      2,
-      (height < ROW_HEIGHT ? y - (ROW_HEIGHT - height) : y) + 15
+      2, // + 2 to push it to the middle
+      (height < ROW_HEIGHT ? y - (ROW_HEIGHT - height) : y) + 15 // + 15 to push it to the middle
     );
   }
 
@@ -78,7 +77,7 @@ const render = () => {
       ctx.fillText(
         xLabels[i],
         width < COL_WIDTH ? x - (COL_WIDTH - width) : x, // if not enough width, set start to negative value since container for text cannot really shrink
-        Y_OFFSET - 10
+        Y_OFFSET - 10 // - 10 to push it up a bit
       );
     }
   }
@@ -93,7 +92,7 @@ const render = () => {
     if (ctx.fillStyle !== desiredFillStyle) {
       ctx.fillStyle = desiredFillStyle;
     }
-    ctx.fillRect(colMAp[i].x, Y_OFFSET, colMAp[i].width, 750);
+    ctx.fillRect(colMAp[i].x, Y_OFFSET, colMAp[i].width, CANVAS_DRAW_HEIGHT);
   }
 
   const startIndexX = Math.max(0, scrollIndexX - MWO_WIDTH / COL_WIDTH + 1);
@@ -122,10 +121,13 @@ const render = () => {
         ? COL_WIDTH * element.maxCol +
           X_OFFSET +
           COL_WIDTH -
-          10 -
+          10 - // - 10 to stop dragged MWO before border
           scrollWrapper.scrollLeft
         : currentIndexX < element.minCol
-        ? COL_WIDTH * element.minCol + X_OFFSET + 2 - scrollWrapper.scrollLeft
+        ? COL_WIDTH * element.minCol +
+          X_OFFSET +
+          2 - // + 2 to stop dragged MWO before border
+          scrollWrapper.scrollLeft
         : dragX;
 
     outOfBounds = x !== dragX;
@@ -152,13 +154,13 @@ const render = () => {
       const connectionStartX =
         connectionStartIndexX * COL_WIDTH +
         COL_WIDTH -
-        5 -
+        DRAG_ANCHOR_RADIUS -
         scrollWrapper.scrollLeft +
         X_OFFSET;
 
       const connectionStartY =
         connectionStartIndexY * ROW_HEIGHT +
-        10 -
+        ROW_HEIGHT / 2 -
         scrollWrapper.scrollTop +
         Y_OFFSET;
 
@@ -200,18 +202,28 @@ const renderElement = (element, y, height) => {
   // only render anchors if mwo has full height
   if (!drag && height === ROW_HEIGHT) {
     if (realMwoWidth === MWO_WIDTH) {
-      ctx.beginPath();
-      // ctx.fillStyle = "blue";
       ctx.fillStyle = DRAG_ANCHOR_FRONT_COLOR;
-      ctx.arc(x + 5, y + 10, 5, 0, Math.PI * 2);
+      ctx.beginPath();
+      ctx.arc(
+        x + DRAG_ANCHOR_RADIUS,
+        y + ROW_HEIGHT / 2,
+        DRAG_ANCHOR_RADIUS,
+        0,
+        Math.PI * 2
+      );
       ctx.fill();
     }
 
-    if (realMwoWidth >= 10) {
+    if (realMwoWidth >= DRAG_ANCHOR_RADIUS * 2) {
       ctx.beginPath();
-      // ctx.fillStyle = "red";
       ctx.fillStyle = DRAG_ANCHOR_BACK_COLOR;
-      ctx.arc(x + 5 + realMwoWidth - 10, y + 10, 5, 0, Math.PI * 2);
+      ctx.arc(
+        x + realMwoWidth - DRAG_ANCHOR_RADIUS,
+        y + ROW_HEIGHT / 2,
+        DRAG_ANCHOR_RADIUS,
+        0,
+        Math.PI * 2
+      );
       ctx.fill();
     }
   }
@@ -336,9 +348,11 @@ function onScrollWrapperMouseDown(event) {
   // delete connections
   if (color === CONNECTION_LINE_COLOR) {
     const currentIndexXMin = Math.floor(scrollWrapper.scrollLeft / COL_WIDTH);
-    const currentIndexXMax = currentIndexXMin + Math.ceil(1100 / COL_WIDTH);
+    const currentIndexXMax =
+      currentIndexXMin + Math.ceil(CANVAS_DRAW_WIDTH / COL_WIDTH);
     const currentIndexYMin = Math.floor(scrollWrapper.scrollTop / ROW_HEIGHT);
-    const currentIndexYMax = currentIndexYMin + Math.ceil(750 / ROW_HEIGHT);
+    const currentIndexYMax =
+      currentIndexYMin + Math.ceil(CANVAS_DRAW_HEIGHT / ROW_HEIGHT);
 
     for (const connection of connections) {
       const cxMin = Math.min(connection.startIndexX, connection.endIndexX);
@@ -414,37 +428,41 @@ addEventListener("mousemove", (event) => {
   if (drag) {
     dragX = event.clientX;
 
-    const { indexX } = getIndicesFromEvent(event);
-    dragTargetDate.innerText = days[indexX];
-
     clearInterval(intervalTimer);
     requestAnimationFrame(render);
 
-    // Horizontal scroll
-    if (
-      !outOfBounds &&
-      event.clientX > UPPER_BOUND_SCROLL_X - 50 &&
-      event.clientX < UPPER_BOUND_SCROLL_X
-    ) {
-      intervalTimer = setInterval(() => {
-        if (outOfBounds) {
-          clearInterval(intervalTimer);
-          return;
-        }
-        scrollWrapper.scrollLeft += COL_WIDTH;
-      }, SCROLL_SPEED);
-    } else if (
-      !outOfBounds &&
-      event.clientX > X_OFFSET &&
-      event.clientX < 150
-    ) {
-      if (outOfBounds) {
-        clearInterval(intervalTimer);
-        return;
+    if (!outOfBounds) {
+      const { indexX } = getIndicesFromEvent(event);
+      dragTargetDate.innerText = days[indexX];
+
+      // Horizontal scroll
+      if (
+        event.clientX > UPPER_BOUND_SCROLL_X - SCROLL_AREA &&
+        event.clientX < UPPER_BOUND_SCROLL_X
+      ) {
+        intervalTimer = setInterval(() => {
+          // can happen due to interval and automatic scrolling
+          if (outOfBounds) {
+            clearInterval(intervalTimer);
+            return;
+          }
+
+          scrollWrapper.scrollLeft += SCROLL_SPEED_PX;
+        }, SCROLL_SPEED_MS);
+      } else if (
+        event.clientX > X_OFFSET &&
+        event.clientX < X_OFFSET + SCROLL_AREA
+      ) {
+        intervalTimer = setInterval(() => {
+          // can happen due to interval
+          if (outOfBounds) {
+            clearInterval(intervalTimer);
+            return;
+          }
+
+          scrollWrapper.scrollLeft -= SCROLL_SPEED_PX;
+        }, SCROLL_SPEED_MS);
       }
-      intervalTimer = setInterval(() => {
-        scrollWrapper.scrollLeft -= COL_WIDTH;
-      }, SCROLL_SPEED);
     }
   }
 
@@ -458,29 +476,33 @@ addEventListener("mousemove", (event) => {
 
     // Horizontal + vertical scroll
     if (
-      event.clientX > UPPER_BOUND_SCROLL_X - 50 &&
+      event.clientX > UPPER_BOUND_SCROLL_X - SCROLL_AREA &&
       event.clientX < UPPER_BOUND_SCROLL_X
     ) {
       intervalTimer = setInterval(() => {
-        scrollWrapper.scrollLeft += COL_WIDTH;
-      }, SCROLL_SPEED);
-    } else if (event.clientX > X_OFFSET && event.clientX < 150) {
-      intervalTimer = setInterval(() => {
-        scrollWrapper.scrollLeft -= COL_WIDTH;
-      }, SCROLL_SPEED);
+        scrollWrapper.scrollLeft += SCROLL_SPEED_PX;
+      }, SCROLL_SPEED_MS);
     } else if (
-      event.clientY > UPPER_BOUND_SCROLL_Y - 50 &&
+      event.clientX > X_OFFSET &&
+      event.clientX < X_OFFSET + SCROLL_AREA
+    ) {
+      intervalTimer = setInterval(() => {
+        scrollWrapper.scrollLeft -= SCROLL_SPEED_PX;
+      }, SCROLL_SPEED_MS);
+    } else if (
+      event.clientY > UPPER_BOUND_SCROLL_Y - SCROLL_AREA &&
       event.clientY < UPPER_BOUND_SCROLL_Y
     ) {
       intervalTimer = setInterval(() => {
-        // I know COL_WIDTH although ROW
-        scrollWrapper.scrollTop += COL_WIDTH;
-      }, SCROLL_SPEED);
-    } else if (event.clientY > Y_OFFSET && event.clientY < 100) {
+        scrollWrapper.scrollTop += SCROLL_SPEED_PX;
+      }, SCROLL_SPEED_MS);
+    } else if (
+      event.clientY > Y_OFFSET &&
+      event.clientY < Y_OFFSET + SCROLL_AREA
+    ) {
       intervalTimer = setInterval(() => {
-        // I know COL_WIDTH although ROW
-        scrollWrapper.scrollTop -= COL_WIDTH;
-      }, SCROLL_SPEED);
+        scrollWrapper.scrollTop -= SCROLL_SPEED_PX;
+      }, SCROLL_SPEED_MS);
     }
   }
 });
@@ -600,6 +622,8 @@ addEventListener("resize", () => {
     scrollWrapper.style.height = `${canvas.height - Y_OFFSET}px`;
     UPPER_BOUND_SCROLL_X = scrollWrapper.clientWidth + X_OFFSET;
     UPPER_BOUND_SCROLL_Y = scrollWrapper.clientHeight + Y_OFFSET;
+    CANVAS_DRAW_WIDTH = canvas.width - X_OFFSET;
+    CANVAS_DRAW_HEIGHT = canvas.height - Y_OFFSET;
     requestAnimationFrame(render);
   }, 500);
 });
@@ -703,6 +727,9 @@ const getCalendarWeek = (date) => {
   return `${d.getUTCFullYear()}-${weekNum}`;
 };
 
+const END_OFFSET = 30;
+const START_OFFSET = 0;
+
 const FIRST_COL_COLOR = `rgb(255 255 255)`;
 const SECOND_COL_COLOR = `rgb(155 155 155)`;
 const TEXT_COLOR = `rgb(0 0 0)`;
@@ -713,7 +740,9 @@ const DRAGGED_MWO_COLOR = `rgba(0, 128, 0, 0.8)`;
 const DRAGGED_MWO_PLACEHOLDER_COLOR = `rgba(0, 128, 0, 0.4)`;
 const CONNECTION_LINE_COLOR = `rgb(3 3 3)`;
 
-const SCROLL_SPEED = 50;
+const SCROLL_SPEED_MS = 50;
+const SCROLL_SPEED_PX = 50;
+const SCROLL_AREA = 50;
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const ROW_HEIGHT = 20;
@@ -723,10 +752,14 @@ const COL_WIDTH_DAY = 60;
 const COL_WIDTH_DAY_WEEK = 30;
 const COL_WIDTH_DAY_MONTH = 10;
 
+const DRAG_ANCHOR_RADIUS = 5;
+
 let VIEW = "day";
 let COL_WIDTH = COL_WIDTH_DAY;
 let UPPER_BOUND_SCROLL_X = 1;
 let UPPER_BOUND_SCROLL_Y = 1;
+let CANVAS_DRAW_HEIGHT = 1;
+let CANVAS_DRAW_WIDTH = 1;
 
 const Y_OFFSET = 50;
 const X_OFFSET = 100;
@@ -745,6 +778,8 @@ scrollWrapper.style.width = `${canvas.width - X_OFFSET}px`;
 scrollWrapper.style.height = `${canvas.height - Y_OFFSET}px`;
 UPPER_BOUND_SCROLL_X = scrollWrapper.clientWidth + X_OFFSET;
 UPPER_BOUND_SCROLL_Y = scrollWrapper.clientHeight + Y_OFFSET;
+CANVAS_DRAW_WIDTH = canvas.width - X_OFFSET;
+CANVAS_DRAW_HEIGHT = canvas.height - Y_OFFSET;
 
 const items = getData() || generateItems(300);
 const codes = getCodes(items);
@@ -796,22 +831,20 @@ const testConnections = [
   // [5, 1, 13, 5],
 ];
 
-// for (let i = 0; i < items.length; i++) {
-//   const elem = items[i];
-//   const indexX = getXIndexFromDate(elem.startDate);
+for (let i = 0; i < items.length; i++) {
+  const elem = items[i];
+  const indexX = getXIndexFromDate(elem.startDate);
 
-//   for (let j = i + 1; j < items.length; j++) {
-//     const _elem = items[j];
-//     const _indexX = getXIndexFromDate(_elem.startDate);
-//     if (_indexX > indexX + 2) {
-//       testConnections.push([indexX, i, _indexX, j]);
-//     }
-//     // const elem = items[i];
-//     // const
-//   }
-// }
+  for (let j = i + 1; j < items.length; j++) {
+    const _elem = items[j];
+    const _indexX = getXIndexFromDate(_elem.startDate);
+    if (_indexX > indexX + 2) {
+      testConnections.push([indexX, i, _indexX, j]);
+    }
+  }
+}
 
-// console.log(testConnections.length);
+console.log(testConnections.length);
 for (const testConnection of testConnections) {
   addConnection(...testConnection);
 }
@@ -824,4 +857,4 @@ document
 render();
 
 // next steps:
-// remove all magic numbers, performance issues
+// connection drawing with max/min, performance issues
