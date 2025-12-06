@@ -306,30 +306,30 @@ function onScrollWrapperMouseDown(event) {
   }
 
   const { indexX, indexY } = getIndicesFromEvent(event);
+  const { realIndexX, realIndexY } = getRealIndicesFromEvent(event);
   const color = getColorFromEventPosition(event);
 
   // start drag
   if (color === MWO_COLOR) {
-    dragIndexX = indexX;
-    dragIndexY = indexY;
+    dragIndexX = realIndexX;
+    dragIndexY = realIndexY;
     drag = true;
 
     ctx.fillStyle = DRAGGED_MWO_PLACEHOLDER_COLOR;
     ctx.fillRect(
-      COL_WIDTH * indexX + X_OFFSET - scrollWrapper.scrollLeft,
-      ROW_HEIGHT * indexY + Y_OFFSET - scrollWrapper.scrollTop,
+      COL_WIDTH * realIndexX + X_OFFSET - scrollWrapper.scrollLeft,
+      ROW_HEIGHT * realIndexY + Y_OFFSET - scrollWrapper.scrollTop,
       COL_WIDTH,
       ROW_HEIGHT
     );
 
-    getElement(indexX, indexY).drag = true;
+    getElement(realIndexX, realIndexY).drag = true;
   }
 
   // start connection
   if (color === DRAG_ANCHOR_BACK_COLOR) {
     connectionMode = true;
 
-    const { realIndexX, realIndexY } = getRealIndicesFromEvent(event);
     connectionIndicators.push([indexX, indexY, realIndexX, realIndexY]);
   }
 
@@ -414,6 +414,9 @@ addEventListener("mousemove", (event) => {
   if (drag) {
     dragX = event.clientX;
 
+    const { indexX } = getIndicesFromEvent(event);
+    dragTargetDate.innerText = days[indexX];
+
     clearInterval(intervalTimer);
     requestAnimationFrame(render);
 
@@ -486,6 +489,7 @@ addEventListener("mousemove", (event) => {
 addEventListener("mouseup", (event) => {
   if (drag) {
     clearInterval(intervalTimer);
+    dragTargetDate.innerText = "";
     getElement(dragIndexX, dragIndexY).drag = false;
 
     if (!outOfBounds) {
@@ -727,6 +731,7 @@ let UPPER_BOUND_SCROLL_Y = 1;
 const Y_OFFSET = 50;
 const X_OFFSET = 100;
 
+const dragTargetDate = document.querySelector("#drag-target-date");
 const wrapper = document.querySelector("#gantt-wrapper");
 const virtualSize = document.querySelector("#gantt-virtual-size");
 const scrollWrapper = document.querySelector("#gantt-scroll-wrapper");
@@ -819,4 +824,4 @@ document
 render();
 
 // next steps:
-// drag, remove all magic numbers, performance issues
+// colors, remove all magic numbers, performance issues
