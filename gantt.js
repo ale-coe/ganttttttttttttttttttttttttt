@@ -709,8 +709,8 @@ const TEXT_COLOR = `rgb(0 0 0)`;
 const DRAG_ANCHOR_FRONT_COLOR = `rgb(1 1 1)`;
 const DRAG_ANCHOR_BACK_COLOR = `rgb(2 2 2)`;
 const MWO_COLOR = `rgb(0 128 0)`;
-const DRAGGED_MWO_COLOR = `rgb(0 0 255)`;
-const DRAGGED_MWO_PLACEHOLDER_COLOR = `rgb(0 200 0)`;
+const DRAGGED_MWO_COLOR = `rgba(0, 128, 0, 0.8)`;
+const DRAGGED_MWO_PLACEHOLDER_COLOR = `rgba(0, 128, 0, 0.4)`;
 const CONNECTION_LINE_COLOR = `rgb(3 3 3)`;
 
 const SCROLL_SPEED = 50;
@@ -824,4 +824,4 @@ document
 render();
 
 // next steps:
-// colors, remove all magic numbers, performance issues
+// remove all magic numbers, performance issues
