@@ -400,14 +400,18 @@ addEventListener("mousemove", (event) => {
   if (drag) {
     dragX = event.clientX;
 
-    clearInterval(timer);
+    clearInterval(intervalTimer);
     requestAnimationFrame(render);
 
     // Horizontal scroll
-    if (!outOfBounds && event.clientX > 1150 && event.clientX < 1200) {
-      timer = setInterval(() => {
+    if (
+      !outOfBounds &&
+      event.clientX > UPPER_BOUND_SCROLL_X - 50 &&
+      event.clientX < UPPER_BOUND_SCROLL_X
+    ) {
+      intervalTimer = setInterval(() => {
         if (outOfBounds) {
-          clearInterval(timer);
+          clearInterval(intervalTimer);
           return;
         }
         scrollWrapper.scrollLeft += COL_WIDTH;
@@ -418,17 +422,17 @@ addEventListener("mousemove", (event) => {
       event.clientX < 150
     ) {
       if (outOfBounds) {
-        clearInterval(timer);
+        clearInterval(intervalTimer);
         return;
       }
-      timer = setInterval(() => {
+      intervalTimer = setInterval(() => {
         scrollWrapper.scrollLeft -= COL_WIDTH;
       }, SCROLL_SPEED);
     }
   }
 
   if (connectionMode) {
-    clearInterval(timer);
+    clearInterval(intervalTimer);
 
     connectionEndX = event.clientX;
     connectionEndY = event.clientY;
@@ -436,21 +440,27 @@ addEventListener("mousemove", (event) => {
     requestAnimationFrame(render);
 
     // Horizontal + vertical scroll
-    if (event.clientX > 1150 && event.clientX < 1200) {
-      timer = setInterval(() => {
+    if (
+      event.clientX > UPPER_BOUND_SCROLL_X - 50 &&
+      event.clientX < UPPER_BOUND_SCROLL_X
+    ) {
+      intervalTimer = setInterval(() => {
         scrollWrapper.scrollLeft += COL_WIDTH;
       }, SCROLL_SPEED);
     } else if (event.clientX > X_OFFSET && event.clientX < 150) {
-      timer = setInterval(() => {
+      intervalTimer = setInterval(() => {
         scrollWrapper.scrollLeft -= COL_WIDTH;
       }, SCROLL_SPEED);
-    } else if (event.clientY > 750 && event.clientY < 800) {
-      timer = setInterval(() => {
+    } else if (
+      event.clientY > UPPER_BOUND_SCROLL_Y - 50 &&
+      event.clientY < UPPER_BOUND_SCROLL_Y
+    ) {
+      intervalTimer = setInterval(() => {
         // I know COL_WIDTH although ROW
         scrollWrapper.scrollTop += COL_WIDTH;
       }, SCROLL_SPEED);
     } else if (event.clientY > Y_OFFSET && event.clientY < 100) {
-      timer = setInterval(() => {
+      intervalTimer = setInterval(() => {
         // I know COL_WIDTH although ROW
         scrollWrapper.scrollTop -= COL_WIDTH;
       }, SCROLL_SPEED);
@@ -461,7 +471,7 @@ addEventListener("mousemove", (event) => {
 // drag end, connection end
 addEventListener("mouseup", (event) => {
   if (drag) {
-    clearInterval(timer);
+    clearInterval(intervalTimer);
     getElement(dragIndexX, dragIndexY).drag = false;
 
     if (!outOfBounds) {
@@ -513,7 +523,7 @@ addEventListener("mouseup", (event) => {
   }
 
   if (connectionMode) {
-    clearInterval(timer);
+    clearInterval(intervalTimer);
     const color = getColorFromEventPosition(event);
 
     // EnSt
@@ -555,6 +565,20 @@ addEventListener("keydown", (event) => {
       connectionIndicators.push([indexX, indexY]);
     }
   }
+});
+
+addEventListener("resize", () => {
+  clearTimeout(timeoutTimer);
+
+  timeoutTimer = setTimeout(() => {
+    canvas.width = wrapper.clientWidth;
+    canvas.height = wrapper.clientHeight;
+    scrollWrapper.style.width = `${canvas.width - X_OFFSET}px`;
+    scrollWrapper.style.height = `${canvas.height - Y_OFFSET}px`;
+    UPPER_BOUND_SCROLL_X = scrollWrapper.clientWidth + X_OFFSET;
+    UPPER_BOUND_SCROLL_Y = scrollWrapper.clientHeight + Y_OFFSET;
+    requestAnimationFrame(render);
+  }, 500);
 });
 
 document.querySelector("#radiogroup").addEventListener("change", (e) => {
@@ -678,17 +702,25 @@ const COL_WIDTH_DAY_MONTH = 10;
 
 let VIEW = "day";
 let COL_WIDTH = COL_WIDTH_DAY;
+let UPPER_BOUND_SCROLL_X = 1;
+let UPPER_BOUND_SCROLL_Y = 1;
 
-const CANVAS_HEIGHT = 800;
-const CANVAS_WIDTH = 1200;
 const Y_OFFSET = 50;
 const X_OFFSET = 100;
 
+const wrapper = document.querySelector("#gantt-wrapper");
 const virtualSize = document.querySelector("#gantt-virtual-size");
 const scrollWrapper = document.querySelector("#gantt-scroll-wrapper");
 const canvas = document.querySelector("#gantt-canvas");
 const ctx = canvas.getContext("2d", { willReadFrequently: true });
 ctx.font = "10px Arial";
+
+canvas.width = wrapper.clientWidth;
+canvas.height = wrapper.clientHeight;
+scrollWrapper.style.width = `${canvas.width - X_OFFSET}px`;
+scrollWrapper.style.height = `${canvas.height - Y_OFFSET}px`;
+UPPER_BOUND_SCROLL_X = scrollWrapper.clientWidth + X_OFFSET;
+UPPER_BOUND_SCROLL_Y = scrollWrapper.clientHeight + Y_OFFSET;
 
 const items = getData() || generateItems(300);
 const codes = getCodes(items);
@@ -706,7 +738,8 @@ let LABEL_ARR = [];
 const matrix = {};
 let connections = [];
 
-let timer = null;
+let intervalTimer = null;
+let timeoutTimer = null;
 
 let dragIndexX = 0;
 let dragIndexY = 0;
@@ -755,9 +788,9 @@ const testConnections = [
 // }
 
 // console.log(testConnections.length);
-for (const testConnection of testConnections) {
-  addConnection(...testConnection);
-}
+// for (const testConnection of testConnections) {
+//   addConnection(...testConnection);
+// }
 // document.querySelector("input[value='week']").checked = true;
 // document
 //   .querySelector("input[value='week']")
@@ -767,4 +800,4 @@ for (const testConnection of testConnections) {
 render();
 
 // next steps:
-// drag, connection, 100%vh/100%vw and so so on
+// drag, connection
