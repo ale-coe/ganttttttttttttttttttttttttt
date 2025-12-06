@@ -87,6 +87,22 @@
         Month
       </label>
     </form>
+
+    <button
+      onclick="document.querySelector('#gantt-scroll-wrapper').scrollLeft -=20"
+    >
+      -
+    </button>
+    <button
+      onclick="document.querySelector('#gantt-scroll-wrapper').scrollLeft +=20"
+    >
+      +
+    </button>
+    <button
+      onclick="document.querySelector('#gantt-scroll-wrapper').scrollLeft =140"
+    >
+      140
+    </button>
     <script src="data.js"></script>
     <script src="gantt.js"></script>
   </body>
