@@ -472,9 +472,10 @@ function onScrollWrapperMouseDown(event) {
             startElement.successorMwos = startElement.successorMwos.filter(
               (mwo) => mwo !== endElement
             );
-            startElement.connectionsAsStart.filter(
-              (c) => c.id !== connectionId
-            );
+            startElement.connectionsAsStart =
+              startElement.connectionsAsStart.filter(
+                (c) => c.id !== connectionId
+              );
             startElement.maxCol =
               Math.min(
                 ...startElement.successorMwos.map((e) =>
@@ -485,7 +486,9 @@ function onScrollWrapperMouseDown(event) {
             endElement.predecessorMwos = endElement.predecessorMwos.filter(
               (mwo) => mwo !== startElement
             );
-            endElement.connectionsAsEnd.filter((c) => c.id !== connectionId);
+            endElement.connectionsAsEnd = endElement.connectionsAsEnd.filter(
+              (c) => c.id !== connectionId
+            );
             endElement.minCol =
               Math.max(
                 ...endElement.predecessorMwos.map((e) =>
