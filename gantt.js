@@ -88,14 +88,18 @@ const render = () => {
 
         const element = getElement(j, i);
         if (element) {
-          firstElementData = { element: getElement(j, i), x, width };
+          firstElementData = {
+            element: getElement(j, i),
+            x,
+            width,
+          };
         }
         continue;
       }
 
       const element = getElement(j, i);
 
-      if (element) renderElement(element, x, y, width, height);
+      if (element) renderElement(element, x, y, width, height, scrollIndexX);
     }
 
     // render first element after render of columns, since mwo would be covered by column
@@ -105,7 +109,8 @@ const render = () => {
         firstElementData.x,
         y,
         firstElementData.width,
-        height
+        height,
+        scrollIndexX
       );
     }
 
@@ -188,12 +193,26 @@ const render = () => {
   }
 };
 
-const renderElement = (element, x, y, width, height) => {
+const renderElement = (element, x, y, width, height, scrollIndexX) => {
   ctx.fillStyle = element.drag ? DRAGGED_MWO_PLACEHOLDER_COLOR : MWO_COLOR;
+
   // for day
-  const realMwoWidth = width === MWO_WIDTH ? MWO_WIDTH : width;
+  let realMwoWidth = width === MWO_WIDTH ? MWO_WIDTH : width;
+  if (VIEW === "week" || VIEW === "month") {
+    const hypotheticalStartX = element.startIndexX * COL_WIDTH;
+    const realStartX = scrollWrapper.scrollLeft;
+    realMwoWidth =
+      scrollIndexX > element.startIndexX ||
+      (scrollIndexX === element.startIndexX &&
+        scrollWrapper.scrollLeft % COL_WIDTH)
+        ? MWO_WIDTH - (realStartX - hypotheticalStartX)
+        : MWO_WIDTH;
+  }
+
+  if (element.code === "NS4JU9") {
+    console.log(VIEW, scrollIndexX, element.startIndexX, realMwoWidth);
+  }
   // for month
-  // const realMwoWidth = MWO_WIDTH;
   ctx.fillRect(x, y, realMwoWidth, height);
 
   // only render anchors if mwo has full height
@@ -277,12 +296,8 @@ function onCanvasClick(event) {
   const indexY = Math.floor(
     (event.clientY - Y_OFFSET + scrollWrapper.scrollTop) / ROW_HEIGHT
   );
-  const item = items[indexY];
-  const indexX = Math.floor(
-    (item.startDate - new Date(startDate).getTime()) / MS_PER_DAY
-  );
 
-  scrollWrapper.scrollLeft = indexX * COL_WIDTH;
+  scrollWrapper.scrollLeft = items[indexY].startIndexX * COL_WIDTH;
 }
 
 function onContextMenu(event) {
@@ -312,9 +327,7 @@ function onScrollWrapperMouseDown(event) {
       ROW_HEIGHT
     );
 
-    try {
-      getElement(indexX, indexY).drag = true;
-    } catch (error) {}
+    getElement(indexX, indexY).drag = true;
   }
 
   // start connection
@@ -463,6 +476,7 @@ addEventListener("mousemove", (event) => {
   }
 });
 
+// drag end, connection end
 addEventListener("mouseup", (event) => {
   if (drag) {
     clearInterval(timer);
@@ -481,6 +495,7 @@ addEventListener("mouseup", (event) => {
         deleteElement(dragIndexX, dragIndexY);
 
         mwo.startDate = new Date(xLabels[indexX]);
+        mwo.startIndexX = indexX;
         for (let i = 0; i < mwo.connectionsAsStart.length; i++) {
           mwo.connectionsAsStart[i].startIndexX = indexX;
         }
@@ -563,12 +578,12 @@ addEventListener("keydown", (event) => {
 document.querySelector("#radiogroup").addEventListener("change", (e) => {
   if (e.target.value === "day") {
     COL_WIDTH = COL_WIDTH_DAY;
-    xLabels = [...days];
+    xLabels = days;
   } else if (e.target.value === "week") {
-    xLabels = days.map((d) => getCalendarWeek(d));
+    xLabels = weeks;
     COL_WIDTH = COL_WIDTH_DAY_WEEK;
   } else if (e.target.value === "month") {
-    xLabels = days.map((d) => d.slice(0, 7));
+    xLabels = months;
     COL_WIDTH = COL_WIDTH_DAY_MONTH;
   }
 
@@ -695,10 +710,12 @@ const items = getData() || generateItems(300);
 const codes = getCodes(items);
 
 const days = getDates(items);
+const weeks = days.map((d) => getCalendarWeek(d));
+const months = days.map((d) => d.slice(0, 7));
 
-let xLabels = [...days];
-const endDate = xLabels[xLabels.length - 1];
+let xLabels = days;
 const startDate = xLabels[0];
+const endDate = xLabels[xLabels.length - 1];
 
 let LABEL_ARR = [];
 
@@ -757,13 +774,13 @@ const testConnections = [
 // for (const testConnection of testConnections) {
 //   addConnection(...testConnection);
 // }
-// document.querySelector("input[value='week']").checked = true;
-// document
-//   .querySelector("input[value='week']")
-//   .dispatchEvent(new Event("change", { bubbles: true }));
+document.querySelector("input[value='week']").checked = true;
+document
+  .querySelector("input[value='week']")
+  .dispatchEvent(new Event("change", { bubbles: true }));
 // add te st values -------------------------------------------------------------------------
 
 render();
 
 // next steps:
-// render MWO for month/week correctly if only part is visible, drag
+// render MWO for month/week correctly if only part is visible, drag, connection, 100%vh/100%vw and so so on
