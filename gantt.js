@@ -104,10 +104,7 @@ const render = () => {
     }
   }
 
-  for (let i = 0; i < connections.length; i++) {
-    // TODO: draws all connections, better only those which are necessary and set max values
-    drawConnection(connections[i]);
-  }
+  drawConnections(connections);
 
   if (drag) {
     const currentIndexX = Math.floor(
@@ -229,54 +226,135 @@ const renderElement = (element, y, height) => {
   }
 };
 
+// prevents duplicates from being added
+const pushPoint = (points, p) => {
+  const last = points[points.length - 1];
+  if (!last || last.x !== p.x || last.y !== p.y) {
+    points.push(p);
+  }
+};
+
+const addSegment = (points, a, b, X_MIN, X_MAX, Y_MIN, Y_MAX) => {
+  // Horizontal segment
+  if (a.y === b.y) {
+    const y = a.y;
+    // Completely above or below viewport therefore skip
+    if (y < Y_MIN || y > Y_MAX) return;
+
+    let x1 = Math.max(X_MIN, Math.min(a.x, b.x));
+    let x2 = Math.min(X_MAX, Math.max(a.x, b.x));
+    if (x1 > x2) return; // outside horizontally
+
+    const p1 = { x: x1, y };
+    const p2 = { x: x2, y };
+
+    pushPoint(points, p1);
+    pushPoint(points, p2);
+  }
+  // Vertical segment
+  else if (a.x === b.x) {
+    const x = a.x;
+    // Completely left or right of viewport therefore skip
+    if (x < X_MIN || x > X_MAX) return;
+
+    let y1 = Math.max(Y_MIN, Math.min(a.y, b.y));
+    let y2 = Math.min(Y_MAX, Math.max(a.y, b.y));
+    if (y1 > y2) return; // outside vertically
+
+    const p1 = { x, y: y1 };
+    const p2 = { x, y: y2 };
+
+    pushPoint(points, p1);
+    pushPoint(points, p2);
+  }
+};
+
 const getPoints = (connection) => {
   const { startIndexX, startIndexY, endIndexX, endIndexY } = connection;
 
-  const start = {
-    x: Math.max(
+  const hypotheticalStart = {
+    x:
       startIndexX * COL_WIDTH -
-        scrollWrapper.scrollLeft +
-        (MWO_WIDTH / COL_WIDTH) * COL_WIDTH + // account for relation between col and mwo width (important for week and month)
-        X_OFFSET,
-      X_OFFSET
-    ),
-    y: Math.max(
-      startIndexY * ROW_HEIGHT - scrollWrapper.scrollTop + 10 + Y_OFFSET,
-      Y_OFFSET
-    ),
+      scrollWrapper.scrollLeft +
+      (MWO_WIDTH / COL_WIDTH) * COL_WIDTH +
+      X_OFFSET,
+    y:
+      startIndexY * ROW_HEIGHT -
+      scrollWrapper.scrollTop +
+      ROW_HEIGHT / 2 +
+      Y_OFFSET,
   };
 
-  const end = {
-    x: Math.max(
-      endIndexX * COL_WIDTH - scrollWrapper.scrollLeft + X_OFFSET,
-      X_OFFSET
-    ),
-    y: Math.max(
-      endIndexY * ROW_HEIGHT - scrollWrapper.scrollTop + 10 + Y_OFFSET,
-      Y_OFFSET
-    ),
+  const hypotheticalEnd = {
+    x: endIndexX * COL_WIDTH - scrollWrapper.scrollLeft + X_OFFSET,
+    y:
+      endIndexY * ROW_HEIGHT -
+      scrollWrapper.scrollTop +
+      ROW_HEIGHT / 2 +
+      Y_OFFSET,
   };
 
-  if (start.x === end.x || start.y === endIndexY) {
-    return null;
-  }
-  // Build a simple H → V → H "dog-leg" path (only right angles)
-  const midX = (start.x + end.x) / 2;
+  const connectionX = hypotheticalEnd.x - 10;
 
-  return [start, { x: midX, y: start.y }, { x: midX, y: end.y }, end];
+  const mid1 = { x: connectionX, y: hypotheticalStart.y };
+  const mid2 = { x: connectionX, y: hypotheticalEnd.y };
+
+  const X_MIN = X_OFFSET;
+  const X_MAX = X_OFFSET + CANVAS_DRAW_WIDTH;
+  const Y_MIN = Y_OFFSET;
+  const Y_MAX = Y_OFFSET + CANVAS_DRAW_HEIGHT;
+
+  const points = [];
+
+  // Build + clip H–V–H segments
+  addSegment(points, hypotheticalStart, mid1, X_MIN, X_MAX, Y_MIN, Y_MAX);
+  addSegment(points, mid1, mid2, X_MIN, X_MAX, Y_MIN, Y_MAX);
+  addSegment(points, mid2, hypotheticalEnd, X_MIN, X_MAX, Y_MIN, Y_MAX);
+
+  return points.length >= 2 ? points : [];
 };
 
-const drawConnection = (connection) => {
-  const points = getPoints(connection);
-  if (!points) return;
+const drawConnections = (connections) => {
+  const pathSet = new Set();
+  const dedupedConnections = [];
+
+  // TODO: draws all connections, better only those which are necessary and set max values
+  for (let i = 0; i < connections.length; i++) {
+    const points = getPoints(connections[i]);
+    const paths = [];
+
+    for (let j = 0; j < points.length - 1; j++) {
+      const start = points[j];
+      const end = points[j + 1];
+      const path = `${start.x}|${start.y}|${end.x}|${end.y}`;
+
+      if (pathSet.has(path)) {
+        continue;
+      }
+
+      pathSet.add(path);
+      paths.push([start, end]);
+    }
+
+    dedupedConnections.push(paths);
+  }
 
   ctx.lineWidth = 3;
   ctx.strokeStyle = CONNECTION_LINE_COLOR;
 
   ctx.beginPath();
-  ctx.moveTo(points[0].x, points[0].y);
-  for (let i = 1; i < points.length; i++) {
-    ctx.lineTo(points[i].x, points[i].y);
+  for (let i = 0; i < dedupedConnections.length; i++) {
+    const connection = dedupedConnections[i];
+    if (!connection.length) continue;
+
+    const [firstStart, firstEnd] = connection[0];
+    ctx.moveTo(firstStart.x, firstStart.y);
+    ctx.lineTo(firstEnd.x, firstEnd.y);
+
+    for (let j = 1; j < connection.length; j++) {
+      const [, end] = connection[j]; // take only end, since only lineTo
+      ctx.lineTo(end.x, end.y);
+    }
   }
   ctx.stroke();
 };
@@ -578,7 +656,6 @@ addEventListener("mouseup", (event) => {
         connectionStartRealIndexX,
         connectionStartRealIndexY,
       ] of connectionIndicators) {
-        console.log(connectionStartRealIndexX, connectionStartRealIndexY);
         addConnection(
           connectionStartRealIndexX,
           connectionStartRealIndexY,
@@ -825,36 +902,37 @@ virtualSize.style.width = `${xLabels.length * COL_WIDTH}px`;
 
 // FOR TESTING PURPOSES -------------------------------------------------------------------------
 const testConnections = [
+  // [0, 0, 699, 211],
   // [6, 2, 9, 4],
   // [6, 3, 9, 4],
   // [5, 1, 9, 4],
   // [5, 1, 13, 5],
 ];
 
-for (let i = 0; i < items.length; i++) {
-  const elem = items[i];
-  const indexX = getXIndexFromDate(elem.startDate);
+// for (let i = 0; i < items.length; i++) {
+//   const elem = items[i];
+//   const indexX = getXIndexFromDate(elem.startDate);
 
-  for (let j = i + 1; j < items.length; j++) {
-    const _elem = items[j];
-    const _indexX = getXIndexFromDate(_elem.startDate);
-    if (_indexX > indexX + 2) {
-      testConnections.push([indexX, i, _indexX, j]);
-    }
-  }
-}
+//   for (let j = i + 1; j < items.length; j++) {
+//     const _elem = items[j];
+//     const _indexX = getXIndexFromDate(_elem.startDate);
+//     if (_indexX > indexX + 2) {
+//       testConnections.push([indexX, i, _indexX, j]);
+//     }
+//   }
+// }
 
-console.log(testConnections.length);
-for (const testConnection of testConnections) {
-  addConnection(...testConnection);
-}
-document.querySelector("input[value='week']").checked = true;
-document
-  .querySelector("input[value='week']")
-  .dispatchEvent(new Event("change", { bubbles: true }));
+// console.log(testConnections.length);
+// for (const testConnection of testConnections) {
+//   addConnection(...testConnection);
+// }
+// document.querySelector("input[value='week']").checked = true;
+// document
+//   .querySelector("input[value='week']")
+//   .dispatchEvent(new Event("change", { bubbles: true }));
 // FOR TESTING PURPOSES -------------------------------------------------------------------------
 
 render();
 
 // next steps:
-// connection drawing with max/min, performance issues
+// performance issues
