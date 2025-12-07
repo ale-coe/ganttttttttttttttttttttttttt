@@ -999,7 +999,7 @@ const testConnections = [
 //   }
 // }
 
-console.log(testConnections.length);
+// console.log(testConnections.length);
 for (const testConnection of testConnections) {
   addConnection(...testConnection);
 }
