@@ -20,9 +20,12 @@ const getCodes = (items) => {
 /**
  * Performance Ideas do batches of cols, mwo, text so that the ctx.fillStyle doesnt need to be changed that often
  */
-const render = () => {
-  // if month / week MWO needs to be rendered even if startIndex of MWO is out of bounds
-  // scrollIndexX
+const render = (timestamp) => {
+  if (lastRenderTimestamp === timestamp) {
+    return;
+  }
+  lastRenderTimestamp = timestamp;
+
   const scrollIndexX = Math.floor(scrollWrapper.scrollLeft / COL_WIDTH);
   const scrollIndexY = Math.floor(scrollWrapper.scrollTop / ROW_HEIGHT);
 
@@ -92,11 +95,17 @@ const render = () => {
     if (ctx.fillStyle !== desiredFillStyle) {
       ctx.fillStyle = desiredFillStyle;
     }
-    ctx.fillRect(colMAp[i].x, Y_OFFSET, colMAp[i].width, CANVAS_DRAW_HEIGHT);
+    ctx.fillRect(
+      colMAp[i].x,
+      Y_OFFSET,
+      colMAp[i].width + 1, // + 1 since in month/week view there were vertical lines in the colored cols, just overlay them
+      CANVAS_DRAW_HEIGHT
+    );
   }
 
   const startIndexX = Math.max(0, scrollIndexX - MWO_WIDTH / COL_WIDTH + 1);
 
+  // if month / week MWO needs to be rendered even if startIndex of MWO is out of bounds
   for (let i = scrollIndexY; i < Math.min(endIndexY, items.length); i++) {
     const item = items[i];
     if (item.startIndexX >= startIndexX && item.startIndexX <= endIndexX) {
@@ -890,6 +899,7 @@ let connectionIndicators = [];
 let connectionEndX = 0;
 let connectionEndY = 0;
 let connectionMode = false;
+let lastRenderTimestamp = 0;
 
 for (let i = 0; i < items.length; i++) {
   const item = items[i];
@@ -925,17 +935,21 @@ const testConnections = [
 //   }
 // }
 
-// console.log(testConnections.length);
-// for (const testConnection of testConnections) {
-//   addConnection(...testConnection);
-// }
-// document.querySelector("input[value='week']").checked = true;
-// document
-//   .querySelector("input[value='week']")
-//   .dispatchEvent(new Event("change", { bubbles: true }));
+console.log(testConnections.length);
+for (const testConnection of testConnections) {
+  addConnection(...testConnection);
+}
+document.querySelector("input[value='week']").checked = true;
+document
+  .querySelector("input[value='week']")
+  .dispatchEvent(new Event("change", { bubbles: true }));
 // FOR TESTING PURPOSES -------------------------------------------------------------------------
 
-render();
+render(performance.now());
 
+// ideas:
+// * render background cols "as whole" for month/week (needs object where "length of weeks/months" is saved)
 // next steps:
-// performance issues
+// * delete connections with "buffer zone"
+// * if drag one, drag connected as well
+// * performance issues
