@@ -480,6 +480,7 @@ function onScrollWrapperMouseDown(event) {
     const currentIndexYMax =
       currentIndexYMin + Math.ceil(CANVAS_DRAW_HEIGHT / ROW_HEIGHT);
 
+    const deletedConnections = [];
     for (const connection of connections) {
       const cxMin = Math.min(connection.startIndexX, connection.endIndexX);
       const cxMax = Math.max(connection.startIndexX, connection.endIndexX);
@@ -505,10 +506,13 @@ function onScrollWrapperMouseDown(event) {
             event.clientX + CONNECTION_LINE_DELETION_GRACE_PIXELS,
             event.clientY + CONNECTION_LINE_DELETION_GRACE_PIXELS,
           ];
-          // connection hit
+
+          // connection hit therefore delete connection
           if (lineIntersectsBox(start, end, boxAroundClick)) {
             const connectionId = `${connection.startIndexX}.${connection.startIndexY}.${connection.endIndexX}.${connection.endIndexY}`;
             connections = connections.filter((c) => c.id !== connectionId);
+
+            deletedConnections.push(connectionId);
 
             const startElement = getElement(
               connection.startIndexX,
@@ -549,6 +553,8 @@ function onScrollWrapperMouseDown(event) {
         }
       }
     }
+
+    console.log(deletedConnections);
 
     requestAnimationFrame(render);
   }
