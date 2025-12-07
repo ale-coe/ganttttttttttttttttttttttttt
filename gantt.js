@@ -855,13 +855,6 @@ const getColorFromEventPosition = (event) => {
     colorSet.add(`rgb(${data[i]} ${data[i + 1]} ${data[i + 2]})`);
   }
 
-  ctx.lineWidth = 1;
-  ctx.strokeRect(
-    event.clientX - CONNECTION_LINE_DELETION_GRACE_PIXELS,
-    event.clientY - CONNECTION_LINE_DELETION_GRACE_PIXELS,
-    CONNECTION_LINE_DELETION_GRACE_PIXELS * 2,
-    CONNECTION_LINE_DELETION_GRACE_PIXELS * 2
-  );
   return { colorSet, exactColor };
 };
 
