@@ -17,9 +17,6 @@ const getCodes = (items) => {
   return items.map((i) => i.code);
 };
 
-/**
- * Performance Ideas do batches of cols, mwo, text so that the ctx.fillStyle doesnt need to be changed that often
- */
 const render = (timestamp) => {
   if (lastRenderTimestamp === timestamp) {
     return;
@@ -398,6 +395,48 @@ const getRealIndicesFromEvent = (event) => {
   return { realIndexX: items[indexY].startIndexX, realIndexY: indexY };
 };
 
+function pointInBox(x, y, minX, maxX, minY, maxY) {
+  return x >= minX && x <= maxX && y >= minY && y <= maxY;
+}
+
+function linesIntersect(line1, line2) {
+  const [x11, x12, y11, y12] = line1;
+  const [x21, x22, y21, y22] = line2;
+
+  const dx1 = x12 - x11;
+  const dy1 = y12 - y11;
+  const dx2 = x22 - x21;
+  const dy2 = y22 - y21;
+
+  const denom = dx1 * dy2 - dy1 * dx2;
+
+  if (denom === 0) return false;
+
+  const dx3 = x21 - x11;
+  const dy3 = y21 - y11;
+
+  const t = (dx3 * dy2 - dy3 * dx2) / denom;
+  const u = (dx3 * dy1 - dy3 * dx1) / denom;
+
+  return t >= 0 && t <= 1 && u >= 0 && u <= 1;
+}
+
+function lineIntersectsBox(start, end, box) {
+  const [minX, minY, maxX, maxY] = box;
+  const { x: x1, y: y1 } = start;
+  const { x: x2, y: y2 } = end;
+  const line = [x1, x2, y1, y2];
+
+  return (
+    pointInBox(x1, y1, minX, maxX, minY, maxY) ||
+    pointInBox(x2, y2, minX, maxX, minY, maxY) ||
+    linesIntersect(line, [minX, maxX, minY, minY]) ||
+    linesIntersect(line, [minX, minX, minY, maxY]) ||
+    linesIntersect(line, [minX, maxX, maxY, maxY]) ||
+    linesIntersect(line, [maxX, maxX, minY, maxY])
+  );
+}
+
 function onScrollWrapperMouseDown(event) {
   // right click
   if (event.button === 2) {
@@ -406,10 +445,10 @@ function onScrollWrapperMouseDown(event) {
 
   const { indexX, indexY } = getIndicesFromEvent(event);
   const { realIndexX, realIndexY } = getRealIndicesFromEvent(event);
-  const color = getColorFromEventPosition(event);
+  const { colorSet, exactColor } = getColorFromEventPosition(event);
 
   // start drag
-  if (color === MWO_COLOR) {
+  if (exactColor === MWO_COLOR) {
     dragIndexX = realIndexX;
     dragIndexY = realIndexY;
     drag = true;
@@ -426,14 +465,14 @@ function onScrollWrapperMouseDown(event) {
   }
 
   // start connection
-  if (color === DRAG_ANCHOR_BACK_COLOR) {
+  if (exactColor === DRAG_ANCHOR_BACK_COLOR) {
     connectionMode = true;
 
     connectionIndicators.push([indexX, indexY, realIndexX, realIndexY]);
   }
 
   // delete connections
-  if (color === CONNECTION_LINE_COLOR) {
+  if (colorSet.has(CONNECTION_LINE_COLOR)) {
     const currentIndexXMin = Math.floor(scrollWrapper.scrollLeft / COL_WIDTH);
     const currentIndexXMax =
       currentIndexXMin + Math.ceil(CANVAS_DRAW_WIDTH / COL_WIDTH);
@@ -460,12 +499,14 @@ function onScrollWrapperMouseDown(event) {
           const start = points[i];
           const end = points[i + 1];
 
-          if (
-            event.clientX >= start.x &&
-            event.clientX <= end.x &&
-            event.clientY >= start.y &&
-            event.clientY <= end.y
-          ) {
+          const boxAroundClick = [
+            event.clientX - CONNECTION_LINE_DELETION_GRACE_PIXELS,
+            event.clientY - CONNECTION_LINE_DELETION_GRACE_PIXELS,
+            event.clientX + CONNECTION_LINE_DELETION_GRACE_PIXELS,
+            event.clientY + CONNECTION_LINE_DELETION_GRACE_PIXELS,
+          ];
+          // connection hit
+          if (lineIntersectsBox(start, end, boxAroundClick)) {
             const connectionId = `${connection.startIndexX}.${connection.startIndexY}.${connection.endIndexX}.${connection.endIndexY}`;
             connections = connections.filter((c) => c.id !== connectionId);
 
@@ -654,10 +695,10 @@ addEventListener("mouseup", (event) => {
 
   if (connectionMode) {
     clearInterval(intervalTimer);
-    const color = getColorFromEventPosition(event);
+    const { exactColor } = getColorFromEventPosition(event);
 
     // EnSt
-    if (color === DRAG_ANCHOR_FRONT_COLOR) {
+    if (exactColor === DRAG_ANCHOR_FRONT_COLOR) {
       // connected with another mwo
       const { indexX: connectionEndIndexX, indexY: connectionEndIndexY } =
         getIndicesFromEvent(event);
@@ -690,9 +731,9 @@ addEventListener("keydown", (event) => {
       clientX: connectionEndX,
       clientY: connectionEndY,
     };
-    const color = getColorFromEventPosition(_event);
+    const { exactColor } = getColorFromEventPosition(_event);
 
-    if (color === DRAG_ANCHOR_BACK_COLOR) {
+    if (exactColor === DRAG_ANCHOR_BACK_COLOR) {
       const { indexX, indexY } = getIndicesFromEvent(_event);
 
       const { realIndexX, realIndexY } = getRealIndicesFromEvent(_event);
@@ -789,13 +830,39 @@ const deleteElement = (indexX, indexY) => {
 };
 
 const getXIndexFromDate = (date) => {
-  return Math.floor((date - new Date(startDate).getTime()) / MS_PER_DAY);
+  return Math.floor((date - startDateMs) / MS_PER_DAY);
 };
 
 const getColorFromEventPosition = (event) => {
-  const { data } = ctx.getImageData(event.clientX, event.clientY, 1, 1);
-  const [r, g, b] = data;
-  return `rgb(${r} ${g} ${b})`;
+  const { data: dataExact } = ctx.getImageData(
+    event.clientX,
+    event.clientY,
+    1,
+    1
+  );
+  const exactColor = `rgb(${dataExact[0]} ${dataExact[1]} ${dataExact[2]})`;
+
+  const { data } = ctx.getImageData(
+    event.clientX - CONNECTION_LINE_DELETION_GRACE_PIXELS,
+    event.clientY - CONNECTION_LINE_DELETION_GRACE_PIXELS,
+    CONNECTION_LINE_DELETION_GRACE_PIXELS * 2,
+    CONNECTION_LINE_DELETION_GRACE_PIXELS * 2
+  );
+
+  const colorSet = new Set();
+  // rgba, therefore take batches of 4
+  for (let i = 0; i <= data.length - 3; i += 4) {
+    colorSet.add(`rgb(${data[i]} ${data[i + 1]} ${data[i + 2]})`);
+  }
+
+  ctx.lineWidth = 1;
+  ctx.strokeRect(
+    event.clientX - CONNECTION_LINE_DELETION_GRACE_PIXELS,
+    event.clientY - CONNECTION_LINE_DELETION_GRACE_PIXELS,
+    CONNECTION_LINE_DELETION_GRACE_PIXELS * 2,
+    CONNECTION_LINE_DELETION_GRACE_PIXELS * 2
+  );
+  return { colorSet, exactColor };
 };
 
 const getCalendarWeek = (date) => {
@@ -841,6 +908,8 @@ const COL_WIDTH_DAY = 60;
 const COL_WIDTH_DAY_WEEK = 30;
 const COL_WIDTH_DAY_MONTH = 10;
 
+const CONNECTION_LINE_DELETION_GRACE_PIXELS = 4;
+
 const DRAG_ANCHOR_RADIUS = 5;
 
 let VIEW = "day";
@@ -879,6 +948,7 @@ const months = days.map((d) => d.slice(0, 7));
 
 let xLabels = days;
 const startDate = xLabels[0];
+const startDateMs = new Date(startDate).getTime();
 const endDate = xLabels[xLabels.length - 1];
 
 let LABEL_ARR = [];
@@ -915,11 +985,12 @@ virtualSize.style.width = `${xLabels.length * COL_WIDTH}px`;
 
 // FOR TESTING PURPOSES -------------------------------------------------------------------------
 const testConnections = [
-  // [0, 0, 699, 211],
-  // [6, 2, 9, 4],
-  // [6, 3, 9, 4],
-  // [5, 1, 9, 4],
-  // [5, 1, 13, 5],
+  [0, 0, 699, 211],
+  [6, 2, 9, 4],
+  [6, 3, 9, 4],
+  [5, 1, 9, 4],
+  [5, 1, 13, 5],
+  [9, 4, 25, 9],
 ];
 
 // for (let i = 0; i < items.length; i++) {
