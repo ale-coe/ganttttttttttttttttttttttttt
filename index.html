@@ -46,6 +46,23 @@
       #radiogroup {
         margin-top: 20px;
       }
+
+      #actions {
+        margin-left: 15px;
+      }
+
+      #actions .row {
+        margin-bottom: 10px;
+      }
+
+      #drag-target-date {
+        margin-left: 20px;
+      }
+
+      #bottom {
+        display: flex;
+        align-items: center;
+      }
     </style>
   </head>
   <body>
@@ -65,34 +82,45 @@
         <div id="gantt-virtual-size"></div>
       </div>
     </div>
-    <form id="radiogroup">
-      <label>
-        <input type="radio" value="day" name="view" checked />
-        Day
-      </label>
-      <label> <input type="radio" value="week" name="view" /> Week </label>
-      <label>
-        <input type="radio" value="month" name="view" />
-        Month
-      </label>
-    </form>
-
-    <button
-      onclick="document.querySelector('#gantt-scroll-wrapper').scrollLeft -=20"
-    >
-      -
-    </button>
-    <button
-      onclick="document.querySelector('#gantt-scroll-wrapper').scrollLeft +=20"
-    >
-      +
-    </button>
-    <button
-      onclick="document.querySelector('#gantt-scroll-wrapper').scrollLeft =140"
-    >
-      140
-    </button>
-    <p id="drag-target-date"></p>
+    <div id="bottom">
+      <div id="actions">
+        <form id="radiogroup" class="row">
+          <label>
+            <input type="radio" value="day" name="view" checked />
+            Day
+          </label>
+          <label> <input type="radio" value="week" name="view" /> Week </label>
+          <label>
+            <input type="radio" value="month" name="view" />
+            Month
+          </label>
+        </form>
+        <div class="row">
+          <label>
+            <input type="checkbox" id="cascading-drag" />
+            Cascading Drag
+          </label>
+        </div>
+        <div class="row">
+          <button
+            onclick="document.querySelector('#gantt-scroll-wrapper').scrollLeft -=20"
+          >
+            -
+          </button>
+          <button
+            onclick="document.querySelector('#gantt-scroll-wrapper').scrollLeft +=20"
+          >
+            +
+          </button>
+          <button
+            onclick="document.querySelector('#gantt-scroll-wrapper').scrollLeft =140"
+          >
+            140
+          </button>
+        </div>
+      </div>
+      <p id="drag-target-date"></p>
+    </div>
     <script src="data.js"></script>
     <script src="gantt.js"></script>
   </body>

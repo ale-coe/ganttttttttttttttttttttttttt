@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/frappe-gantt/dist/frappe-gantt.umd.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/frappe-gantt/dist/frappe-gantt.css"
+    />
+    <style>
+      html,
+      body {
+        margin: 0;
+      }
+      /* 
+      #gantt {
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+      } */
+      #container1 {
+        align-items: center;
+        display: flex;
+        flex-direction: column;
+        flex-wrap: nowrap;
+        gap: 0px;
+        height: fit-content;
+        justify-content: center;
+        position: static;
+        margin: 10px;
+      }
+      #container2 {
+        align-items: center;
+        border-radius: 10px;
+        display: grid;
+        height: 800px;
+        overflow: auto; /* <-- single scrollbar here */
+        background-color: #ededed;
+        border: 1px solid #b0b0b0;
+        width: 80%;
+        margin: 5px;
+      }
+
+      #gantt {
+        width: 100%;
+        height: auto;
+        overflow: visible; /* <-- no scrollbars here */
+      }
+
+      .gantt-container {
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container1">
+      <div id="container2">
+        <div id="gantt"></div>
+      </div>
+    </div>
+    <script>
+      function randomDate(startYear = 2024, endYear = 2024) {
+        const start = new Date(`${startYear}-12-01`).getTime();
+        const end = new Date(`${endYear}-12-31`).getTime();
+        return new Date(start + Math.random() * (end - start));
+      }
+
+      function formatDate(date) {
+        return date.toISOString().slice(0, 10); // YYYY-MM-DD
+      }
+
+      function generateTasks(count = 20) {
+        const tasks = [];
+
+        for (let i = 1; i <= count; i++) {
+          const startDate = randomDate();
+          const endDate = new Date(
+            startDate.getTime() +
+              24 * 60 * 60 * 1000 +
+              Math.random() * (7 * 24 * 60 * 60 * 1000)
+          );
+          // endDate = start + up to 7 days (adjust if you want)
+
+          tasks.push({
+            id: String(i),
+            name: `Task ${i}`,
+            start: formatDate(startDate),
+            end: formatDate(endDate),
+            progress: Math.floor(Math.random() * 100),
+            dependencies: i !== 1 ? [String(i - 1)] : [],
+          });
+        }
+
+        return tasks;
+      }
+      let tasks = generateTasks(20);
+      console.log(tasks);
+      let gantt = new Gantt("#gantt", tasks, { column_width: 30 });
+
+      // Use .refresh to update the chart
+      //   gantt.tasks.append(...)
+      //   gantt.tasks.refresh();
+    </script>
+  </body>
+</html>

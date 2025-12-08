@@ -20,16 +20,21 @@ const generateItems = (count) => {
       const start = randomDate(startMin, endMax);
       let due = randomDate(start, endMax); // dueDate should be >= startDate
 
+      const startIndexX = Math.ceil(
+        (start.getTime() - new Date(startMin).getTime()) / (24 * 60 * 60 * 1000)
+      );
+
       return {
         startDate: start.getTime(),
+        startIndexX,
         code: makeCode(),
         dueDate: due.getTime(),
-        minCol: Number.NEGATIVE_INFINITY,
-        maxCol: Number.POSITIVE_INFINITY,
         predecessorMwos: [],
         successorMwos: [],
         connectionsAsStart: [],
         connectionsAsEnd: [],
+        minCol: Number.NEGATIVE_INFINITY,
+        maxCol: Number.POSITIVE_INFINITY,
       };
     })
     .sort((a, b) => a.startDate - b.startDate);

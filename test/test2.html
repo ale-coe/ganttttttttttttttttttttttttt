@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Frappe Gantt – Click to Add Dependencies</title>
+
+  <!-- Frappe Gantt CSS (from CDN) -->
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/frappe-gantt/dist/frappe-gantt.css"
+  />
+
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+      margin: 0;
+      padding: 1rem;
+      background: #f5f5f5;
+    }
+
+    #controls {
+      margin-bottom: 1rem;
+      padding: 0.75rem 1rem;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      font-size: 14px;
+    }
+
+    #status {
+      font-weight: 500;
+    }
+
+    #status span {
+      font-family: monospace;
+      padding: 0.1rem 0.3rem;
+      border-radius: 4px;
+      background: #eee;
+    }
+
+    #gantt {
+      background: #fff;
+      border-radius: 8px;
+      padding: 1rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    }
+
+    button {
+      border-radius: 999px;
+      border: none;
+      padding: 0.35rem 0.9rem;
+      font-size: 13px;
+      cursor: pointer;
+      background: #e0e0e0;
+    }
+
+    button:hover {
+      background: #d0d0d0;
+    }
+
+    button.primary {
+      background: #1976d2;
+      color: #fff;
+    }
+
+    button.primary:hover {
+      background: #145aa1;
+    }
+
+    .selected-bar {
+      stroke: #1976d2;
+      stroke-width: 2;
+    }
+  </style>
+</head>
+<body>
+  <div id="controls">
+    <div id="status">Click a task bar to choose a <b>source</b>...</div>
+    <button id="clearSelection">Clear selection</button>
+    <button id="logData" class="primary">Log tasks to console</button>
+  </div>
+  <div id="gantt"></div>
+
+  <!-- Frappe Gantt JS (from CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/frappe-gantt/dist/frappe-gantt.umd.js"></script>
+
+  <script>
+    // --- Sample tasks -------------------------------------------------------
+    let tasks = [
+      {
+        id: "1",
+        name: "Redesign website",
+        start: "2020-01-01",
+        end: "2020-01-05",
+        progress: 20,
+        dependencies: ""
+      },
+      {
+        id: "2",
+        name: "API integration",
+        start: "2020-01-06",
+        end: "2020-01-10",
+        progress: 0,
+        dependencies: ""
+      },
+      {
+        id: "3",
+        name: "Testing",
+        start: "2020-01-11",
+        end: "2020-01-15",
+        progress: 0,
+        dependencies: ""
+      },
+      {
+        id: "4",
+        name: "Deployment",
+        start: "2020-01-16",
+        end: "2020-01-18",
+        progress: 0,
+        dependencies: ""
+      }
+    ];
+
+    // --- State for interactive dependency creation -------------------------
+    let gantt = null;
+    let selectedSourceId = null;
+
+    const statusEl = document.getElementById("status");
+    const clearBtn = document.getElementById("clearSelection");
+    const logBtn = document.getElementById("logData");
+
+    function setStatusIdle() {
+      statusEl.innerHTML = 'Click a task bar to choose a <b>source</b>...';
+    }
+
+    function setStatusSourceSelected(id) {
+      statusEl.innerHTML =
+        'Source selected: <span>' +
+        id +
+        "</span>. Now click another task to add a dependency.";
+    }
+
+    function setStatusDependencyAdded(src, dst) {
+      statusEl.innerHTML =
+        "Dependency added: <span>" +
+        src +
+        "</span> → <span>" +
+        dst +
+        "</span>. Click another source or clear selection.";
+    }
+
+    // --- Utility: get dependencies as array for a task ---------------------
+    function getDepArray(task) {
+      if (!task.dependencies) return [];
+      if (Array.isArray(task.dependencies)) return task.dependencies;
+      return String(task.dependencies)
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+    }
+
+    function setDepArray(task, arr) {
+      // Frappe supports a comma-separated string; keep it simple
+      task.dependencies = arr.join(", ");
+    }
+
+    // --- Render / re-render Gantt ------------------------------------------
+    function renderGantt() {
+      // (Re)create gantt instance
+      gantt = new Gantt("#gantt", tasks, {
+        view_mode: "Day",
+        date_format: "YYYY-MM-DD",
+        on_click: handleTaskClick
+      });
+
+      // Add visual highlight to selected source bar (if any)
+      if (selectedSourceId) {
+        // bars are accessible via gantt.bars
+        const bar = gantt.bars.find((b) => b.task.id === selectedSourceId);
+        if (bar && bar.$bar) {
+          bar.$bar.classList.add("selected-bar");
+        }
+      }
+    }
+
+    // --- Click handler to add dependencies ---------------------------------
+    function handleTaskClick(task) {
+      if (!selectedSourceId) {
+        // First click: choose source
+        selectedSourceId = task.id;
+        setStatusSourceSelected(task.id);
+        renderGantt();
+        return;
+      }
+
+      const srcId = selectedSourceId;
+      const dstId = task.id;
+
+      if (srcId === dstId) {
+        // Clicking the same task again just clears selection
+        selectedSourceId = null;
+        setStatusIdle();
+        renderGantt();
+        return;
+      }
+
+      // Add dependency: dst depends on src
+      const dstTask = tasks.find((t) => t.id === dstId);
+      let deps = getDepArray(dstTask);
+
+      if (!deps.includes(srcId)) {
+        deps.push(srcId);
+        setDepArray(dstTask, deps);
+        setStatusDependencyAdded(srcId, dstId);
+      } else {
+        statusEl.innerHTML =
+          "Dependency already exists: <span>" +
+          srcId +
+          "</span> → <span>" +
+          dstId +
+          "</span>.";
+      }
+
+      // Optionally: keep the same source selected, or reset
+      // Here we keep the source so you can click several targets
+      // selectedSourceId = null;
+
+      renderGantt();
+    }
+
+    // --- Button wiring ------------------------------------------------------
+    clearBtn.addEventListener("click", () => {
+      selectedSourceId = null;
+      setStatusIdle();
+      renderGantt();
+    });
+
+    logBtn.addEventListener("click", () => {
+      console.log("Current tasks:", tasks);
+      alert("Tasks logged to console.");
+    });
+
+    // --- Initial render -----------------------------------------------------
+    setStatusIdle();
+    renderGantt();
+  </script>
+</body>
+</html>
