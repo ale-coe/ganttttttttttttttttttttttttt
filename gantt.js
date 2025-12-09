@@ -24,8 +24,9 @@ const render = (timestamp) => {
   }
   lastRenderTimestamp = timestamp;
 
-  const scrollIndexX = Math.floor(scrollWrapper.scrollLeft / COL_WIDTH);
-  const scrollIndexY = Math.floor(scrollWrapper.scrollTop / ROW_HEIGHT);
+  const { scrollTop, scrollLeft } = scrollWrapper;
+  const scrollIndexX = Math.floor(scrollLeft / COL_WIDTH);
+  const scrollIndexY = Math.floor(scrollTop / ROW_HEIGHT);
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -38,15 +39,14 @@ const render = (timestamp) => {
   ctx.fillStyle = TEXT_COLOR;
   // render codes
   for (let i = scrollIndexY; i < Math.min(endIndexY, codes.length); i++) {
+    const indexYOffset = i - scrollIndexY;
     const y =
       i === scrollIndexY
-        ? ROW_HEIGHT * (i - scrollIndexY) + Y_OFFSET
-        : ROW_HEIGHT * (i - scrollIndexY) +
-          Y_OFFSET -
-          (scrollWrapper.scrollTop % ROW_HEIGHT);
+        ? ROW_HEIGHT * indexYOffset + Y_OFFSET
+        : ROW_HEIGHT * indexYOffset + Y_OFFSET - (scrollTop % ROW_HEIGHT);
     const height =
-      scrollWrapper.scrollTop % ROW_HEIGHT && i === scrollIndexY
-        ? ROW_HEIGHT - (scrollWrapper.scrollTop % ROW_HEIGHT)
+      scrollTop % ROW_HEIGHT && i === scrollIndexY
+        ? ROW_HEIGHT - (scrollTop % ROW_HEIGHT)
         : ROW_HEIGHT;
 
     rowMap[i] = { y, height };
@@ -61,15 +61,14 @@ const render = (timestamp) => {
   const colMAp = {};
   // render dates
   for (let i = scrollIndexX; i < Math.min(endIndexX, xLabels.length); i++) {
+    const indexXOffset = i - scrollIndexX;
     const x =
       i === scrollIndexX
-        ? COL_WIDTH * (i - scrollIndexX) + X_OFFSET
-        : COL_WIDTH * (i - scrollIndexX) +
-          X_OFFSET -
-          (scrollWrapper.scrollLeft % COL_WIDTH);
+        ? COL_WIDTH * indexXOffset + X_OFFSET
+        : COL_WIDTH * indexXOffset + X_OFFSET - (scrollLeft % COL_WIDTH);
     const width =
-      scrollWrapper.scrollLeft % COL_WIDTH && i === scrollIndexX
-        ? COL_WIDTH - (scrollWrapper.scrollLeft % COL_WIDTH)
+      scrollLeft % COL_WIDTH && i === scrollIndexX
+        ? COL_WIDTH - (scrollLeft % COL_WIDTH)
         : COL_WIDTH;
 
     colMAp[i] = { x, width };
@@ -130,13 +129,13 @@ const render = (timestamp) => {
         connectionStartIndexX * COL_WIDTH +
         COL_WIDTH -
         DRAG_ANCHOR_RADIUS -
-        scrollWrapper.scrollLeft +
+        scrollLeft +
         X_OFFSET;
 
       const connectionStartY =
         connectionStartIndexY * ROW_HEIGHT +
         ROW_HEIGHT / 2 -
-        scrollWrapper.scrollTop +
+        scrollTop +
         Y_OFFSET;
 
       // more of a heuristic
@@ -152,10 +151,13 @@ const render = (timestamp) => {
 };
 
 const renderElement = (element, y, height, startIndexX, endIndexX) => {
-  const currentDragIndexX = drag ? getXIndexFromPosition(dragX) : -1;
-  const dragElementStartIndeX = drag
-    ? getElement(dragIndexX, dragIndexY).startIndexX
-    : -1;
+  let currentDragIndexX = -1;
+  let dragElementStartIndeX = -1;
+
+  if (drag) {
+    currentDragIndexX = getXIndexFromPosition(dragX);
+    dragElementStartIndeX = getElement(dragIndexX, dragIndexY).startIndexX;
+  }
 
   // account for delta (dragDepLevel[element.code]) between drag element and drag dep element so that drag dep elements get picked up along th drag and do not jump
   const dragDep =
@@ -195,9 +197,9 @@ const renderElement = (element, y, height, startIndexX, endIndexX) => {
 
     // only render anchors if mwo has full height
     if (!drag && height === ROW_HEIGHT) {
+      ctx.beginPath();
       if (realMwoWidth === MWO_WIDTH) {
         ctx.fillStyle = DRAG_ANCHOR_FRONT_COLOR;
-        ctx.beginPath();
         ctx.arc(
           x + DRAG_ANCHOR_RADIUS,
           y + ROW_HEIGHT / 2,
@@ -205,11 +207,9 @@ const renderElement = (element, y, height, startIndexX, endIndexX) => {
           0,
           Math.PI * 2
         );
-        ctx.fill();
       }
 
       if (realMwoWidth >= DRAG_ANCHOR_RADIUS * 2) {
-        ctx.beginPath();
         ctx.fillStyle = DRAG_ANCHOR_BACK_COLOR;
         ctx.arc(
           x + realMwoWidth - DRAG_ANCHOR_RADIUS,
@@ -218,8 +218,8 @@ const renderElement = (element, y, height, startIndexX, endIndexX) => {
           0,
           Math.PI * 2
         );
-        ctx.fill();
       }
+      ctx.fill();
     }
   }
 
@@ -235,20 +235,17 @@ const renderElement = (element, y, height, startIndexX, endIndexX) => {
         ? MAX_BOUND_CROSSED
         : NO_BOUND_CROSSED;
 
-    const __x = !outOfBounds
-      ? dragX
-      : outOfBounds > NO_BOUND_CROSSED
-      ? dragMaxCol * COL_WIDTH +
-        X_OFFSET -
-        scrollWrapper.scrollLeft +
-        COL_WIDTH -
-        2 // - 2 to stop dragged MWO before border
-      : dragMinCol * COL_WIDTH + X_OFFSET - scrollWrapper.scrollLeft + 2; // + 2 to stop dragged MWO before border
+    const scrollLeft = scrollWrapper.scrollLeft;
+    const xOffsetHelper = X_OFFSET - scrollLeft;
 
-    let _x =
-      (outOfBounds ? __x : dragX) +
-      COL_WIDTH * (dragDepLevel[element.code] || 0);
-    ctx.fillRect(_x, y, MWO_WIDTH, height);
+    const baseX =
+      outOfBounds === NO_BOUND_CROSSED
+        ? dragX
+        : outOfBounds > NO_BOUND_CROSSED
+        ? dragMaxCol * COL_WIDTH + xOffsetHelper + COL_WIDTH - 2 // stop before right border
+        : dragMinCol * COL_WIDTH + xOffsetHelper + 2; // stop before left border
+    const x = baseX + (dragDepLevel[element.code] | 0) * COL_WIDTH; // use of single pipe | is intended here, binary operator
+    ctx.fillRect(x, y, MWO_WIDTH, height);
   }
 };
 
@@ -972,6 +969,7 @@ const MWO_COLOR = `rgb(0 128 0)`;
 const DRAGGED_MWO_COLOR = `rgba(0, 128, 0, 0.8)`;
 const DRAGGED_MWO_PLACEHOLDER_COLOR = `rgba(0, 128, 0, 0.4)`;
 const CONNECTION_LINE_COLOR = `rgb(3 3 3)`;
+const DRAGGED_MWO_CONNECTION_COLOR = `rgb(255 0 0)`;
 
 const SCROLL_SPEED_MS = 50;
 const SCROLL_SPEED_PX = 50;
