@@ -151,19 +151,23 @@ const renderElement = (element, y, height, startIndexX, endIndexX) => {
 
   if (drag) {
     currentDragIndexX = getXIndexFromPosition(dragX);
-    dragElementStartIndeX = getElement(dragIndexX, dragIndexY).startIndexX;
+    dragElementStartIndeX = getElement(
+      dragElementStartIndexX,
+      dragElementStartIndexY
+    ).startIndexX;
   }
 
-  // account for delta (dragDepLevel[element.code]) between drag element and drag dep element so that drag dep elements get picked up along th drag and do not jump
+  // account for delta (dragDepLevel[element.code].delta) between drag element and drag dep element so that drag dep elements get picked up along the drag and do not jump
   const dragDep =
     drag &&
     DRAG_DEP_MAX_LEVEL &&
     element.code in dragDepLevel &&
     // drag towards successor and stay at their "correct" place if dragged back
-    ((element.startIndexX <= currentDragIndexX + dragDepLevel[element.code] &&
+    ((element.startIndexX <=
+      currentDragIndexX + dragDepLevel[element.code].delta &&
       dragElementStartIndeX <= element.startIndexX) ||
       // drag towards predecessor and stay at their "correct" place if dragged back
-      (currentDragIndexX + dragDepLevel[element.code] + 1 <=
+      (currentDragIndexX + dragDepLevel[element.code].delta + 1 <=
         element.startIndexX &&
         element.startIndexX <= dragElementStartIndeX));
 
@@ -238,7 +242,7 @@ const renderElement = (element, y, height, startIndexX, endIndexX) => {
         : outOfBounds > NO_BOUND_CROSSED
         ? dragMaxCol * COL_WIDTH + xOffsetHelper + COL_WIDTH - 2 // stop before right border
         : dragMinCol * COL_WIDTH + xOffsetHelper + 2; // stop before left border
-    const x = baseX + (dragDepLevel[element.code] | 0) * COL_WIDTH; // use of single pipe | is intended here, binary operator
+    const x = baseX + (dragDepLevel[element.code]?.delta | 0) * COL_WIDTH; // use of single pipe | is intended here, binary operator hopefully faster
     ctx.fillRect(x, y, MWO_WIDTH, height);
   }
 };
@@ -460,8 +464,8 @@ function onScrollWrapperMouseDown(event) {
 
   // start drag
   if (exactColor === MWO_COLOR) {
-    dragIndexX = realIndexX;
-    dragIndexY = realIndexY;
+    dragElementStartIndexX = realIndexX;
+    dragElementStartIndexY = realIndexY;
     drag = true;
 
     ctx.fillStyle = DRAGGED_MWO_PLACEHOLDER_COLOR;
@@ -484,12 +488,13 @@ function onScrollWrapperMouseDown(event) {
 
     let successorMwos = element.successorMwos;
     let predecessorMwos = element.predecessorMwos;
-    const _depDragLevel = {};
+    const _dragDepLevel = {};
 
     let iMax = 1;
     let iMin = 1;
 
     // TODO1: MWO might not be draggable, cause already finished
+    // TODO1: whats with MWOs that are not visible on y-axis? (should be fine?!)
     // if there is more than 1 path from MWOa to MWOf, account for that, too (add image in docs)
     //  MWOa -> MWOb -> MOWf and MWOa -> MWOc -> MWOd -> MWOe -> MWOf
     let i = 1;
@@ -503,7 +508,11 @@ function onScrollWrapperMouseDown(event) {
 
         for (let j = 0; j < successorMwos.length; j++) {
           const successor = successorMwos[j];
-          _depDragLevel[successor.code] = [i, successor.startIndexX];
+          _dragDepLevel[successor.code] = {
+            delta: i,
+            startIndexX: successor.startIndexX,
+            startIndexY: successor.startIndexY,
+          };
           nextSuccessorMwos = nextSuccessorMwos.concat(successor.successorMwos);
 
           _dragMaxCol = Math.max(_dragMaxCol, successor.maxCol);
@@ -518,7 +527,11 @@ function onScrollWrapperMouseDown(event) {
 
         for (let j = 0; j < predecessorMwos.length; j++) {
           const predecessor = predecessorMwos[j];
-          _depDragLevel[predecessor.code] = [-i, predecessor.startIndexX];
+          _dragDepLevel[predecessor.code] = {
+            delta: -i,
+            startIndexX: predecessor.startIndexX,
+            startIndexY: predecessor.startIndexY,
+          };
           nextPredecessorMwos = nextPredecessorMwos.concat(
             predecessor.predecessorMwos
           );
@@ -534,28 +547,24 @@ function onScrollWrapperMouseDown(event) {
       i++;
     }
 
-    // TODO1: store subgraph for later use?!
+    // TODO2: store subgraph for later use?!
     dragMinCol = Math.max(dragMinCol, 0) + (iMin - 1);
-    dragMaxCol = Math.min(dragMaxCol, days.length - 1) - iMax;
-    dragDepLevel = _depDragLevel;
+    dragMaxCol = Math.min(dragMaxCol, days.length - 1) - iMax + 1;
+    dragDepLevel = _dragDepLevel;
 
-    // remove MWOs where startIndexX >= dragMaxCol (cause those can never be dragDep)
-    // vice versa for dragMinCol
-    for (const [key, [offset, startIndexX]] of Object.entries(dragDepLevel)) {
-      if (offset > 0) {
-        if (startIndexX > dragMaxCol + 1) {
+    // remove MWOs whose startIndexX doesnt fit dragMaxCol/dragMinCol (cause those can never be dragDep)
+    for (const [key, { delta, startIndexX }] of Object.entries(dragDepLevel)) {
+      console.log();
+      if (delta > 0) {
+        if (dragMaxCol + 1 < startIndexX) {
           delete dragDepLevel[key];
-        } else {
-          dragDepLevel[key] = offset;
         }
       }
 
-      if (offset < 0) {
+      if (delta < 0) {
         // TODO1: why -2?
         if (startIndexX < dragMinCol - 2) {
           delete dragDepLevel[key];
-        } else {
-          dragDepLevel[key] = offset;
         }
       }
     }
@@ -738,54 +747,79 @@ addEventListener("mousemove", (event) => {
   }
 });
 
+const moveMwoAfterDrag = (index, indexY, dragTargetIndexX) => {
+  const mwo = getElement(index, indexY);
+  setElement(dragTargetIndexX, indexY, mwo);
+  deleteElement(index, indexY);
+
+  mwo.startDate = new Date(xLabels[dragTargetIndexX]);
+  mwo.startIndexX = dragTargetIndexX;
+  for (let i = 0; i < mwo.connectionsAsStart.length; i++) {
+    mwo.connectionsAsStart[i].startIndexX = dragTargetIndexX;
+  }
+
+  for (let i = 0; i < mwo.connectionsAsEnd.length; i++) {
+    mwo.connectionsAsEnd[i].endIndexX = dragTargetIndexX;
+  }
+
+  for (let i = 0; i < mwo.predecessorMwos.length; i++) {
+    // get all successorMwos from current item, min index is new maxCol
+    mwo.predecessorMwos[i].maxCol =
+      Math.min(
+        ...mwo.predecessorMwos[i].successorMwos.map((sMwo) =>
+          getXIndexFromDate(sMwo.startDate)
+        )
+      ) - 1;
+  }
+
+  for (let i = 0; i < mwo.successorMwos.length; i++) {
+    // get all predecessorMwos from current item, max index is new minCol
+    mwo.successorMwos[i].minCol =
+      Math.max(
+        ...mwo.successorMwos[i].predecessorMwos.map((pMwo) =>
+          getXIndexFromDate(pMwo.startDate)
+        )
+      ) + 1;
+  }
+};
+
 // drag end, connection end
 addEventListener("mouseup", (event) => {
   if (drag) {
     clearInterval(intervalTimer);
     dragTargetDate.innerText = "";
-    getElement(dragIndexX, dragIndexY).drag = false;
+    getElement(dragElementStartIndexX, dragElementStartIndexY).drag = false;
 
     if (!outOfBounds) {
-      const { indexX } = getIndicesFromEvent(event);
+      const { indexX: dragTargetIndexX } = getIndicesFromEvent(event);
 
+      // drag to another col happended
       if (
-        indexX !== dragIndexX &&
-        indexX >= 0 &&
-        indexX <= xLabels.length - 1
+        dragTargetIndexX !== dragElementStartIndexX &&
+        dragTargetIndexX >= 0 &&
+        dragTargetIndexX <= xLabels.length - 1
       ) {
-        // TODO1: do for all elements in dragDepLevel if !!DRAG_DEP_MAX_LEVEL
-        const mwo = getElement(dragIndexX, dragIndexY);
-        setElement(indexX, dragIndexY, mwo);
-        deleteElement(dragIndexX, dragIndexY);
+        // move dragged mwo
+        moveMwoAfterDrag(
+          dragElementStartIndexX,
+          dragElementStartIndexY,
+          dragTargetIndexX
+        );
 
-        mwo.startDate = new Date(xLabels[indexX]);
-        mwo.startIndexX = indexX;
-        for (let i = 0; i < mwo.connectionsAsStart.length; i++) {
-          mwo.connectionsAsStart[i].startIndexX = indexX;
-        }
-
-        for (let i = 0; i < mwo.connectionsAsEnd.length; i++) {
-          mwo.connectionsAsEnd[i].endIndexX = indexX;
-        }
-
-        for (let i = 0; i < mwo.predecessorMwos.length; i++) {
-          // get all successorMwos from current item, min index is new maxCol
-          mwo.predecessorMwos[i].maxCol =
-            Math.min(
-              ...mwo.predecessorMwos[i].successorMwos.map((e) =>
-                getXIndexFromDate(e.startDate)
-              )
-            ) - 1;
-        }
-
-        for (let i = 0; i < mwo.successorMwos.length; i++) {
-          // get all predecessorMwos from current item, max index is new minCol
-          mwo.successorMwos[i].minCol =
-            Math.max(
-              ...mwo.successorMwos[i].predecessorMwos.map((e) =>
-                getXIndexFromDate(e.startDate)
-              )
-            ) + 1;
+        // move other dragged dep mwo
+        for (const [, { delta, startIndexX, startIndexY }] of Object.entries(
+          dragDepLevel
+        )) {
+          if (
+            (delta > 0 && startIndexX < dragTargetIndexX + delta) ||
+            (delta < 0 && startIndexX > dragTargetIndexX + delta)
+          ) {
+            moveMwoAfterDrag(
+              startIndexX,
+              startIndexY,
+              dragTargetIndexX + delta
+            );
+          }
         }
       }
     }
@@ -1073,8 +1107,8 @@ let connections = [];
 let intervalTimer = null;
 let timeoutTimer = null;
 
-let dragIndexX = 0;
-let dragIndexY = 0;
+let dragElementStartIndexX = 0;
+let dragElementStartIndexY = 0;
 let dragX = 0;
 let drag = false;
 
@@ -1156,7 +1190,8 @@ render(performance.now());
 // * render background cols "as whole" for month/week (needs object where "length of weeks/months" is saved)
 // * cache connections, recalc connections only if scrollLeft/scrollTop changes (during drag, not much scrolling)
 // next steps:
-// * if drag one, drag connected as well
+// * small inconsistency: drag 9GCZEK twice to the max and see for yourself...
+// * -if drag one, drag connected as well-
 // * * save predecessor and successor with indexX in resp. arrays instead of plain array
 // * * cascading drag is kind of a hard problem (Directed Acyclic Graph!)
 // * * * dragging only 2-3 levels deep
