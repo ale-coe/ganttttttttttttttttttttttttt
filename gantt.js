@@ -495,7 +495,10 @@ function onScrollWrapperMouseDown(event) {
 
     let iMax = 1;
     let iMin = 1;
+
     // TODO1: MWO might not be draggable, cause already finished
+    // if there is more than 1 path from MWOa to MWOf, account for that, too (add image in docs)
+    //  MWOa -> MWOb -> MOWf and MWOa -> MWOc -> MWOd -> MWOe -> MWOf
     let i = 1;
     while (i <= DRAG_DEP_MAX_LEVEL) {
       let nextSuccessorMwos = [];
@@ -506,12 +509,11 @@ function onScrollWrapperMouseDown(event) {
         iMax++;
 
         for (let j = 0; j < successorMwos.length; j++) {
-          _depDragLevel[successorMwos[j].code] = i;
-          nextSuccessorMwos = nextSuccessorMwos.concat(
-            successorMwos[j].successorMwos
-          );
+          const successor = successorMwos[j];
+          _depDragLevel[successor.code] = [i, successor.startIndexX];
+          nextSuccessorMwos = nextSuccessorMwos.concat(successor.successorMwos);
 
-          _dragMaxCol = Math.max(_dragMaxCol, successorMwos[j].maxCol);
+          _dragMaxCol = Math.max(_dragMaxCol, successor.maxCol);
         }
 
         dragMaxCol = _dragMaxCol;
@@ -522,12 +524,13 @@ function onScrollWrapperMouseDown(event) {
         iMin++;
 
         for (let j = 0; j < predecessorMwos.length; j++) {
-          _depDragLevel[predecessorMwos[j].code] = -i;
+          const predecessor = predecessorMwos[j];
+          _depDragLevel[predecessor.code] = [-i, predecessor.startIndexX];
           nextPredecessorMwos = nextPredecessorMwos.concat(
-            predecessorMwos[j].predecessorMwos
+            predecessor.predecessorMwos
           );
 
-          _dragMinCol = Math.min(_dragMinCol, predecessorMwos[j].minCol);
+          _dragMinCol = Math.min(_dragMinCol, predecessor.minCol);
         }
 
         dragMinCol = _dragMinCol;
@@ -542,6 +545,27 @@ function onScrollWrapperMouseDown(event) {
     dragMinCol = Math.max(dragMinCol, 0) + (iMin - 1);
     dragMaxCol = Math.min(dragMaxCol, days.length - 1) - iMax;
     dragDepLevel = _depDragLevel;
+
+    // remove MWOs where startIndexX >= dragMaxCol (cause those can never be dragDep)
+    // vice versa for dragMinCol
+    for (const [key, [offset, startIndexX]] of Object.entries(dragDepLevel)) {
+      if (offset > 0) {
+        if (startIndexX > dragMaxCol + 1) {
+          delete dragDepLevel[key];
+        } else {
+          dragDepLevel[key] = offset;
+        }
+      }
+
+      if (offset < 0) {
+        // TODO1: why -2?
+        if (startIndexX < dragMinCol - 2) {
+          delete dragDepLevel[key];
+        } else {
+          dragDepLevel[key] = offset;
+        }
+      }
+    }
   }
 
   // start connection
@@ -1112,7 +1136,7 @@ for (const testConnection of testConnections) {
   addConnection(...testConnection);
 }
 
-const selecteValue = "week";
+const selecteValue = "day";
 document.querySelector(`input[value='${selecteValue}']`).checked = true;
 document
   .querySelector(`input[value='${selecteValue}']`)
