@@ -166,13 +166,10 @@ const renderElement = (element, y, height, startIndexX, endIndexX) => {
     DRAG_DEP_MAX_LEVEL &&
     element.code in dragDepLevel &&
     // drag towards successor and stay at their "correct" place if dragged back
-    ((element.startIndexX <=
-      currentDragIndexX +
-        MWO_WIDTH / COL_WIDTH +
-        (dragDepLevel[element.code] - 1) &&
+    ((element.startIndexX <= currentDragIndexX + dragDepLevel[element.code] &&
       dragElementStartIndeX <= element.startIndexX) ||
       // drag towards predecessor and stay at their "correct" place if dragged back
-      (currentDragIndexX + (dragDepLevel[element.code] + 1) <=
+      (currentDragIndexX + dragDepLevel[element.code] + 1 <=
         element.startIndexX &&
         element.startIndexX <= dragElementStartIndeX));
 
@@ -198,8 +195,8 @@ const renderElement = (element, y, height, startIndexX, endIndexX) => {
 
     // only render anchors if mwo has full height
     if (!drag && height === ROW_HEIGHT) {
-      ctx.beginPath();
       if (realMwoWidth === MWO_WIDTH) {
+        ctx.beginPath();
         ctx.fillStyle = DRAG_ANCHOR_FRONT_COLOR;
         ctx.arc(
           x + DRAG_ANCHOR_RADIUS,
@@ -208,10 +205,12 @@ const renderElement = (element, y, height, startIndexX, endIndexX) => {
           0,
           Math.PI * 2
         );
+        ctx.fill();
       }
 
       if (realMwoWidth >= DRAG_ANCHOR_RADIUS * 2) {
         ctx.fillStyle = DRAG_ANCHOR_BACK_COLOR;
+        ctx.beginPath();
         ctx.arc(
           x + realMwoWidth - DRAG_ANCHOR_RADIUS,
           y + ROW_HEIGHT / 2,
@@ -219,8 +218,8 @@ const renderElement = (element, y, height, startIndexX, endIndexX) => {
           0,
           Math.PI * 2
         );
+        ctx.fill();
       }
-      ctx.fill();
     }
   }
 
