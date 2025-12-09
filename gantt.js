@@ -27,65 +27,61 @@ const render = (timestamp) => {
   const { scrollTop, scrollLeft } = scrollWrapper;
   const scrollIndexX = Math.floor(scrollLeft / COL_WIDTH);
   const scrollIndexY = Math.floor(scrollTop / ROW_HEIGHT);
+  const startIndexX = Math.max(0, scrollIndexX - MWO_WIDTH / COL_WIDTH + 1);
+  const endIndexX =
+    scrollIndexX + Math.ceil((canvas.width - X_OFFSET) / COL_WIDTH) + 1;
+  const endIndexY =
+    scrollIndexY + Math.ceil((canvas.height - Y_OFFSET) / ROW_HEIGHT) + 1;
+
+  const maxRow = Math.min(endIndexY, codes.length, items.length);
+  const maxCol = Math.min(endIndexX, xLabels.length);
+  const rowRemainder = scrollTop % ROW_HEIGHT;
+  const colRemainder = scrollLeft % COL_WIDTH;
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  const endIndexY =
-    scrollIndexY + Math.ceil((canvas.height - Y_OFFSET) / ROW_HEIGHT) + 1;
-  const endIndexX =
-    scrollIndexX + Math.ceil((canvas.width - X_OFFSET) / COL_WIDTH) + 1;
-
-  const rowMap = {};
+  const rowArr = Array(maxRow);
   ctx.fillStyle = TEXT_COLOR;
   // render codes
-  for (let i = scrollIndexY; i < Math.min(endIndexY, codes.length); i++) {
+  for (let i = scrollIndexY; i < maxRow; i++) {
+    // 1st row might be rendered differently
     const indexYOffset = i - scrollIndexY;
-    const y =
-      i === scrollIndexY
-        ? ROW_HEIGHT * indexYOffset + Y_OFFSET
-        : ROW_HEIGHT * indexYOffset + Y_OFFSET - (scrollTop % ROW_HEIGHT);
-    const height =
-      scrollTop % ROW_HEIGHT && i === scrollIndexY
-        ? ROW_HEIGHT - (scrollTop % ROW_HEIGHT)
-        : ROW_HEIGHT;
+    const isFirstRow = !indexYOffset;
+    // convert bool to number
+    const y = Y_OFFSET + ROW_HEIGHT * indexYOffset - !isFirstRow * rowRemainder;
+    const shrink = isFirstRow * rowRemainder;
+    const height = ROW_HEIGHT - shrink;
 
-    rowMap[i] = { y, height };
+    rowArr[i] = { y, height };
 
-    ctx.fillText(
-      codes[i],
-      2, // + 2 to push it to the middle
-      (height < ROW_HEIGHT ? y - (ROW_HEIGHT - height) : y) + 15 // + 15 to push it to the middle
-    );
+    // + 15 to push it to the middle
+    ctx.fillText(codes[i], 2, y - (ROW_HEIGHT - height) + 15);
   }
 
-  const colMAp = {};
+  const colArr = Array(maxCol);
   // render dates
-  for (let i = scrollIndexX; i < Math.min(endIndexX, xLabels.length); i++) {
+  for (let i = scrollIndexX; i < maxCol; i++) {
+    // 1st col might be rendered differently
     const indexXOffset = i - scrollIndexX;
-    const x =
-      i === scrollIndexX
-        ? COL_WIDTH * indexXOffset + X_OFFSET
-        : COL_WIDTH * indexXOffset + X_OFFSET - (scrollLeft % COL_WIDTH);
-    const width =
-      scrollLeft % COL_WIDTH && i === scrollIndexX
-        ? COL_WIDTH - (scrollLeft % COL_WIDTH)
-        : COL_WIDTH;
+    const isFirstCol = !indexXOffset;
+    // convert bool to number
+    const x = X_OFFSET + COL_WIDTH * indexXOffset - !isFirstCol * colRemainder;
+    const shrink = isFirstCol * colRemainder;
+    const width = COL_WIDTH - shrink;
 
-    colMAp[i] = { x, width };
+    colArr[i] = { x, width };
 
-    if (xLabels[i] !== xLabels[i - 1]) {
-      ctx.fillText(
-        // xLabels[i],
-        i,
-        width < COL_WIDTH ? x - (COL_WIDTH - width) : x, // if not enough width, set start to negative value since container for text cannot really shrink
-        Y_OFFSET - 10 // - 10 to push it up a bit
-      );
+    const label = xLabels[i];
+    if (label !== xLabels[i - 1]) {
+      // - 10 to push it up a bit
+      ctx.fillText(label, x - (COL_WIDTH - width), Y_OFFSET - 10);
     }
   }
 
   // render cols
-  for (let i = scrollIndexX; i < Math.min(endIndexX, xLabels.length); i++) {
-    let virtualLabelIndex = VIEW === "day" ? i : LABEL_ARR.indexOf(xLabels[i]);
+  for (let i = scrollIndexX; i < maxCol; i++) {
+    // accounts for duplicate labels (week / month)
+    let virtualLabelIndex = LABEL_ARR[i];
     const desiredFillStyle =
       virtualLabelIndex % 2 ? SECOND_COL_COLOR : FIRST_COL_COLOR;
 
@@ -94,21 +90,19 @@ const render = (timestamp) => {
       ctx.fillStyle = desiredFillStyle;
     }
     ctx.fillRect(
-      colMAp[i].x,
+      colArr[i].x,
       Y_OFFSET,
-      colMAp[i].width + 1, // + 1 since in month/week view there were vertical lines in the colored cols, just overlay them
+      colArr[i].width + 1, // + 1 since in month/week view there were vertical lines in the colored cols, just overlay them
       CANVAS_DRAW_HEIGHT
     );
   }
 
-  const startIndexX = Math.max(0, scrollIndexX - MWO_WIDTH / COL_WIDTH + 1);
-
   // if month / week MWO needs to be rendered even if startIndex of MWO is out of bounds
-  for (let i = scrollIndexY; i < Math.min(endIndexY, items.length); i++) {
+  for (let i = scrollIndexY; i < maxRow; i++) {
     renderElement(
       items[i],
-      rowMap[i].y,
-      rowMap[i].height,
+      rowArr[i].y,
+      rowArr[i].height,
       startIndexX,
       endIndexX
     );
@@ -870,8 +864,8 @@ addEventListener("resize", () => {
 
 document.querySelector("#radiogroup").addEventListener("change", (e) => {
   if (e.target.value === "day") {
-    COL_WIDTH = COL_WIDTH_DAY;
     xLabels = days;
+    COL_WIDTH = COL_WIDTH_DAY;
   } else if (e.target.value === "week") {
     xLabels = weeks;
     COL_WIDTH = COL_WIDTH_DAY_WEEK;
@@ -880,7 +874,14 @@ document.querySelector("#radiogroup").addEventListener("change", (e) => {
     COL_WIDTH = COL_WIDTH_DAY_MONTH;
   }
 
-  LABEL_ARR = Array.from(new Set(xLabels));
+  LABEL_ARR = Array(xLabels.length);
+  for (let i = 0; i < xLabels.length; i++) {
+    LABEL_ARR[i] =
+      xLabels[i] !== xLabels[i - 1]
+        ? (typeof LABEL_ARR[i - 1] !== "number" ? -1 : LABEL_ARR[i - 1]) + 1 // value might be 0 and 0 is falsy :(
+        : LABEL_ARR[i - 1] || 0;
+  }
+
   VIEW = e.target.value;
   virtualSize.style.height = `${codes.length * ROW_HEIGHT}px`;
   virtualSize.style.width = `${xLabels.length * COL_WIDTH}px`;
@@ -1052,7 +1053,7 @@ UPPER_BOUND_SCROLL_Y = scrollWrapper.clientHeight + Y_OFFSET;
 CANVAS_DRAW_WIDTH = canvas.width - X_OFFSET;
 CANVAS_DRAW_HEIGHT = canvas.height - Y_OFFSET;
 
-const items = getData().slice(0, 10) || generateItems(300);
+const items = getData() || generateItems(300);
 const codes = getCodes(items);
 
 const days = getDates(items);
@@ -1135,6 +1136,8 @@ for (const testConnection of testConnections) {
   addConnection(...testConnection);
 }
 
+// const selecteValue = "month";
+// const selecteValue = "week";
 const selecteValue = "day";
 document.querySelector(`input[value='${selecteValue}']`).checked = true;
 document
