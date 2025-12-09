@@ -18,6 +18,7 @@ const getCodes = (items) => {
 };
 
 const render = (timestamp) => {
+  // prevents rerender at same point in time (performance.now)
   if (lastRenderTimestamp === timestamp) {
     return;
   }
@@ -104,42 +105,16 @@ const render = (timestamp) => {
 
   // if month / week MWO needs to be rendered even if startIndex of MWO is out of bounds
   for (let i = scrollIndexY; i < Math.min(endIndexY, items.length); i++) {
-    const item = items[i];
-    if (item.startIndexX >= startIndexX && item.startIndexX <= endIndexX) {
-      renderElement(item, rowMap[i].y, rowMap[i].height);
-    }
+    renderElement(
+      items[i],
+      rowMap[i].y,
+      rowMap[i].height,
+      startIndexX,
+      endIndexX
+    );
   }
 
   drawConnections(connections);
-
-  if (drag) {
-    const realX = dragX - X_OFFSET + scrollWrapper.scrollLeft;
-
-    outOfBounds =
-      realX < dragMinCol * COL_WIDTH
-        ? MIN_BOUND_CROSSED
-        : realX > dragMaxCol * COL_WIDTH + COL_WIDTH
-        ? MAX_BOUND_CROSSED
-        : NO_BOUND_CROSSED;
-
-    const x = !outOfBounds
-      ? dragX
-      : outOfBounds > NO_BOUND_CROSSED
-      ? dragMaxCol * COL_WIDTH +
-        X_OFFSET -
-        scrollWrapper.scrollLeft +
-        COL_WIDTH -
-        2 // - 2 to stop dragged MWO before border
-      : dragMinCol * COL_WIDTH + X_OFFSET - scrollWrapper.scrollLeft + 2; // + 2 to stop dragged MWO before border
-
-    ctx.fillStyle = DRAGGED_MWO_COLOR;
-    ctx.fillRect(
-      x,
-      ROW_HEIGHT * dragIndexY - scrollWrapper.scrollTop + Y_OFFSET,
-      MWO_WIDTH,
-      ROW_HEIGHT
-    );
-  }
 
   if (connectionMode) {
     ctx.strokeStyle = CONNECTION_LINE_COLOR;
@@ -164,14 +139,6 @@ const render = (timestamp) => {
         scrollWrapper.scrollTop +
         Y_OFFSET;
 
-      // TODO1: use linear equation to make it better
-      // TODO1: check if /0 -> NaN/Infinity
-      // const m =
-      //   (connectionEndY - connectionStartY) / (connectionStartX - connectionEndX);
-      // const n = connectionStartY / (m * connectionStartX);
-      // y = mx + n
-      // x = (y-n)/m
-
       // more of a heuristic
       const _connectionStartX = Math.max(connectionStartX, X_OFFSET);
       const _connectionStartY = Math.max(connectionStartY, Y_OFFSET);
@@ -184,64 +151,104 @@ const render = (timestamp) => {
   }
 };
 
-const renderElement = (element, y, height) => {
-  // hypothetical start of element on x-axis
-  const hStartX = element.startIndexX * COL_WIDTH;
-  const x =
-    (hStartX < scrollWrapper.scrollLeft ? scrollWrapper.scrollLeft : hStartX) +
-    X_OFFSET -
-    scrollWrapper.scrollLeft;
-  const realMwoWidth =
-    MWO_WIDTH - (x - X_OFFSET + scrollWrapper.scrollLeft - hStartX);
+const renderElement = (element, y, height, startIndexX, endIndexX) => {
+  const currentDragIndexX = drag ? getXIndexFromPosition(dragX) : -1;
+  const dragElementStartIndeX = drag
+    ? getElement(dragIndexX, dragIndexY).startIndexX
+    : -1;
 
-  const currentDragIndexX = getXIndexFromPosition(dragX);
-  const depDrag =
+  // account for delta (dragDepLevel[element.code]) between drag element and drag dep element so that drag dep elements get picked up along th drag and do not jump
+  const dragDep =
     drag &&
     DRAG_DEP_MAX_LEVEL &&
     element.code in dragDepLevel &&
-    // drag towards successor and stay at their "correct" place if dragged back (for successor)
-    ((element.startIndexX <= currentDragIndexX &&
-      element.startIndexX >= getElement(dragIndexX, dragIndexY).startIndexX) ||
-      // drag towards predecessor
-      (element.startIndexX >= currentDragIndexX &&
-        element.startIndexX <= getElement(dragIndexX, dragIndexY).startIndexX));
+    // drag towards successor and stay at their "correct" place if dragged back
+    ((element.startIndexX <=
+      currentDragIndexX +
+        MWO_WIDTH / COL_WIDTH +
+        (dragDepLevel[element.code] - 1) &&
+      dragElementStartIndeX <= element.startIndexX) ||
+      // drag towards predecessor and stay at their "correct" place if dragged back
+      (currentDragIndexX + (dragDepLevel[element.code] + 1) <=
+        element.startIndexX &&
+        element.startIndexX <= dragElementStartIndeX));
 
-  const desiredFillStyle =
-    element.drag || depDrag ? DRAGGED_MWO_PLACEHOLDER_COLOR : MWO_COLOR;
-  if (desiredFillStyle !== ctx.fillStyle) {
-    ctx.fillStyle = desiredFillStyle;
+  // render element at current "real" position
+  if (element.startIndexX >= startIndexX && element.startIndexX <= endIndexX) {
+    // hypothetical start of element on x-axis
+    const hStartX = element.startIndexX * COL_WIDTH;
+    const x =
+      (hStartX < scrollWrapper.scrollLeft
+        ? scrollWrapper.scrollLeft
+        : hStartX) +
+      X_OFFSET -
+      scrollWrapper.scrollLeft;
+    const realMwoWidth =
+      MWO_WIDTH - (x - X_OFFSET + scrollWrapper.scrollLeft - hStartX);
+
+    const desiredFillStyle =
+      element.drag || dragDep ? DRAGGED_MWO_PLACEHOLDER_COLOR : MWO_COLOR;
+    if (desiredFillStyle !== ctx.fillStyle) {
+      ctx.fillStyle = desiredFillStyle;
+    }
+    ctx.fillRect(x, y, realMwoWidth, height);
+
+    // only render anchors if mwo has full height
+    if (!drag && height === ROW_HEIGHT) {
+      if (realMwoWidth === MWO_WIDTH) {
+        ctx.fillStyle = DRAG_ANCHOR_FRONT_COLOR;
+        ctx.beginPath();
+        ctx.arc(
+          x + DRAG_ANCHOR_RADIUS,
+          y + ROW_HEIGHT / 2,
+          DRAG_ANCHOR_RADIUS,
+          0,
+          Math.PI * 2
+        );
+        ctx.fill();
+      }
+
+      if (realMwoWidth >= DRAG_ANCHOR_RADIUS * 2) {
+        ctx.beginPath();
+        ctx.fillStyle = DRAG_ANCHOR_BACK_COLOR;
+        ctx.arc(
+          x + realMwoWidth - DRAG_ANCHOR_RADIUS,
+          y + ROW_HEIGHT / 2,
+          DRAG_ANCHOR_RADIUS,
+          0,
+          Math.PI * 2
+        );
+        ctx.fill();
+      }
+    }
   }
 
-  let _x = depDrag ? dragX + COL_WIDTH * dragDepLevel[element.code] : x;
-  ctx.fillRect(_x, y, realMwoWidth, height);
+  // render element at position resulting from drag
+  if (element.drag || dragDep) {
+    ctx.fillStyle = DRAGGED_MWO_COLOR;
 
-  // only render anchors if mwo has full height
-  if (!drag && height === ROW_HEIGHT) {
-    if (realMwoWidth === MWO_WIDTH) {
-      ctx.fillStyle = DRAG_ANCHOR_FRONT_COLOR;
-      ctx.beginPath();
-      ctx.arc(
-        x + DRAG_ANCHOR_RADIUS,
-        y + ROW_HEIGHT / 2,
-        DRAG_ANCHOR_RADIUS,
-        0,
-        Math.PI * 2
-      );
-      ctx.fill();
-    }
+    const realX = dragX - X_OFFSET + scrollWrapper.scrollLeft;
+    outOfBounds =
+      realX < dragMinCol * COL_WIDTH
+        ? MIN_BOUND_CROSSED
+        : realX > dragMaxCol * COL_WIDTH + COL_WIDTH
+        ? MAX_BOUND_CROSSED
+        : NO_BOUND_CROSSED;
 
-    if (realMwoWidth >= DRAG_ANCHOR_RADIUS * 2) {
-      ctx.beginPath();
-      ctx.fillStyle = DRAG_ANCHOR_BACK_COLOR;
-      ctx.arc(
-        x + realMwoWidth - DRAG_ANCHOR_RADIUS,
-        y + ROW_HEIGHT / 2,
-        DRAG_ANCHOR_RADIUS,
-        0,
-        Math.PI * 2
-      );
-      ctx.fill();
-    }
+    const __x = !outOfBounds
+      ? dragX
+      : outOfBounds > NO_BOUND_CROSSED
+      ? dragMaxCol * COL_WIDTH +
+        X_OFFSET -
+        scrollWrapper.scrollLeft +
+        COL_WIDTH -
+        2 // - 2 to stop dragged MWO before border
+      : dragMinCol * COL_WIDTH + X_OFFSET - scrollWrapper.scrollLeft + 2; // + 2 to stop dragged MWO before border
+
+    let _x =
+      (outOfBounds ? __x : dragX) +
+      COL_WIDTH * (dragDepLevel[element.code] || 0);
+    ctx.fillRect(_x, y, MWO_WIDTH, height);
   }
 };
 
@@ -488,6 +495,7 @@ function onScrollWrapperMouseDown(event) {
     let predecessorMwos = element.predecessorMwos;
     const _depDragLevel = {};
 
+    // TODO1: MWO might not be draggable, cause already finished
     let i = 1;
     while (i <= DRAG_DEP_MAX_LEVEL) {
       let nextSuccessorMwos = [];
@@ -499,7 +507,11 @@ function onScrollWrapperMouseDown(event) {
           successorMwos[j].successorMwos
         );
 
-        dragMaxCol = Math.max(dragMaxCol, successorMwos[j].maxCol);
+        dragMaxCol =
+          Math.min(
+            Math.max(dragMaxCol, successorMwos[j].maxCol),
+            days.length - 1
+          ) - i;
       }
 
       for (let j = 0; j < predecessorMwos.length; j++) {
@@ -508,7 +520,8 @@ function onScrollWrapperMouseDown(event) {
           predecessorMwos[j].predecessorMwos
         );
 
-        dragMinCol = Math.min(dragMinCol, predecessorMwos[j].minCol);
+        dragMinCol =
+          Math.max(Math.min(dragMinCol, predecessorMwos[j].minCol), 0) + i;
       }
 
       predecessorMwos = nextPredecessorMwos;
@@ -609,8 +622,6 @@ function onScrollWrapperMouseDown(event) {
         }
       }
     }
-
-    console.log(deletedConnections);
 
     requestAnimationFrame(render);
   }
@@ -1065,6 +1076,10 @@ const testConnections = [
   [5, 1, 9, 4],
   [5, 1, 13, 5],
   [9, 4, 25, 9],
+  [13, 5, 15, 6],
+  [15, 6, 17, 7],
+  [17, 7, 21, 8],
+  [21, 8, 25, 9],
 ];
 
 // for (let i = 0; i < items.length; i++) {
@@ -1085,7 +1100,7 @@ for (const testConnection of testConnections) {
   addConnection(...testConnection);
 }
 
-const selecteValue = "week";
+const selecteValue = "day";
 document.querySelector(`input[value='${selecteValue}']`).checked = true;
 document
   .querySelector(`input[value='${selecteValue}']`)
@@ -1101,6 +1116,7 @@ render(performance.now());
 
 // ideas:
 // * render background cols "as whole" for month/week (needs object where "length of weeks/months" is saved)
+// * cache connections, recalc connections only if scrollLeft/scrollTop changes (during drag, not much scrolling)
 // next steps:
 // * if drag one, drag connected as well
 // * * save predecessor and successor with indexX in resp. arrays instead of plain array
