@@ -75,7 +75,8 @@ const render = (timestamp) => {
 
     if (xLabels[i] !== xLabels[i - 1]) {
       ctx.fillText(
-        xLabels[i],
+        // xLabels[i],
+        i,
         width < COL_WIDTH ? x - (COL_WIDTH - width) : x, // if not enough width, set start to negative value since container for text cannot really shrink
         Y_OFFSET - 10 // - 10 to push it up a bit
       );
@@ -492,33 +493,44 @@ function onScrollWrapperMouseDown(event) {
     let predecessorMwos = element.predecessorMwos;
     const _depDragLevel = {};
 
+    let iMax = 1;
+    let iMin = 1;
     // TODO1: MWO might not be draggable, cause already finished
     let i = 1;
     while (i <= DRAG_DEP_MAX_LEVEL) {
       let nextSuccessorMwos = [];
       let nextPredecessorMwos = [];
 
-      for (let j = 0; j < successorMwos.length; j++) {
-        _depDragLevel[successorMwos[j].code] = i;
-        nextSuccessorMwos = nextSuccessorMwos.concat(
-          successorMwos[j].successorMwos
-        );
+      if (successorMwos.length) {
+        let _dragMaxCol = 0;
+        iMax++;
 
-        dragMaxCol =
-          Math.min(
-            Math.max(dragMaxCol, successorMwos[j].maxCol),
-            days.length - 1
-          ) - i;
+        for (let j = 0; j < successorMwos.length; j++) {
+          _depDragLevel[successorMwos[j].code] = i;
+          nextSuccessorMwos = nextSuccessorMwos.concat(
+            successorMwos[j].successorMwos
+          );
+
+          _dragMaxCol = Math.max(_dragMaxCol, successorMwos[j].maxCol);
+        }
+
+        dragMaxCol = _dragMaxCol;
       }
 
-      for (let j = 0; j < predecessorMwos.length; j++) {
-        _depDragLevel[predecessorMwos[j].code] = -i;
-        nextPredecessorMwos = nextPredecessorMwos.concat(
-          predecessorMwos[j].predecessorMwos
-        );
+      if (predecessorMwos.length) {
+        let _dragMinCol = days.length - 1;
+        iMin++;
 
-        dragMinCol =
-          Math.max(Math.min(dragMinCol, predecessorMwos[j].minCol), 0) + i;
+        for (let j = 0; j < predecessorMwos.length; j++) {
+          _depDragLevel[predecessorMwos[j].code] = -i;
+          nextPredecessorMwos = nextPredecessorMwos.concat(
+            predecessorMwos[j].predecessorMwos
+          );
+
+          _dragMinCol = Math.min(_dragMinCol, predecessorMwos[j].minCol);
+        }
+
+        dragMinCol = _dragMinCol;
       }
 
       predecessorMwos = nextPredecessorMwos;
@@ -527,6 +539,8 @@ function onScrollWrapperMouseDown(event) {
     }
 
     // TODO1: store subgraph for later use?!
+    dragMinCol = Math.max(dragMinCol, 0) + (iMin - 1);
+    dragMaxCol = Math.min(dragMaxCol, days.length - 1) - iMax;
     dragDepLevel = _depDragLevel;
   }
 
@@ -1015,7 +1029,7 @@ UPPER_BOUND_SCROLL_Y = scrollWrapper.clientHeight + Y_OFFSET;
 CANVAS_DRAW_WIDTH = canvas.width - X_OFFSET;
 CANVAS_DRAW_HEIGHT = canvas.height - Y_OFFSET;
 
-const items = getData() || generateItems(300);
+const items = getData().slice(0, 10) || generateItems(300);
 const codes = getCodes(items);
 
 const days = getDates(items);
@@ -1069,8 +1083,8 @@ virtualSize.style.width = `${xLabels.length * COL_WIDTH}px`;
 // FOR TESTING PURPOSES -------------------------------------------------------------------------
 const testConnections = [
   // [0, 0, 699, 211],
-  [6, 2, 9, 4],
-  [6, 3, 9, 4],
+  // [6, 2, 9, 4],
+  // [6, 3, 9, 4],
   [5, 1, 9, 4],
   [5, 1, 13, 5],
   [9, 4, 25, 9],
@@ -1098,7 +1112,7 @@ for (const testConnection of testConnections) {
   addConnection(...testConnection);
 }
 
-const selecteValue = "day";
+const selecteValue = "week";
 document.querySelector(`input[value='${selecteValue}']`).checked = true;
 document
   .querySelector(`input[value='${selecteValue}']`)
