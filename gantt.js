@@ -104,7 +104,8 @@ const render = (timestamp) => {
       rowArr[i].y,
       rowArr[i].height,
       startIndexX,
-      endIndexX
+      endIndexX,
+      scrollLeft
     );
   }
 
@@ -145,7 +146,14 @@ const render = (timestamp) => {
   }
 };
 
-const renderElement = (element, y, height, startIndexX, endIndexX) => {
+const renderElement = (
+  element,
+  y,
+  height,
+  startIndexX,
+  endIndexX,
+  scrollLeft
+) => {
   let currentDragIndexX = -1;
   let dragElementStartIndeX = -1;
 
@@ -173,31 +181,48 @@ const renderElement = (element, y, height, startIndexX, endIndexX) => {
 
   // render element at current "real" position
   if (element.startIndexX >= startIndexX && element.startIndexX <= endIndexX) {
-    // hypothetical start of element on x-axis
+    // (h)ypothetical/(r)eal start of element on x-axis
     const hStartX = element.startIndexX * COL_WIDTH;
-    const x =
+    const rStartX =
       (hStartX < scrollWrapper.scrollLeft
         ? scrollWrapper.scrollLeft
         : hStartX) +
       X_OFFSET -
       scrollWrapper.scrollLeft;
-    const realMwoWidth =
-      MWO_WIDTH - (x - X_OFFSET + scrollWrapper.scrollLeft - hStartX);
+    const rMwoWidth =
+      MWO_WIDTH - (rStartX - X_OFFSET + scrollWrapper.scrollLeft - hStartX);
+    const plannedOverdue = element.startIndexX > element.dueIndexX;
 
     const desiredFillStyle =
-      element.drag || dragDep ? DRAGGED_MWO_PLACEHOLDER_COLOR : MWO_COLOR;
+      element.drag || dragDep
+        ? plannedOverdue
+          ? DRAGGED_MWO_PLACEHOLDER_OVERDUE_COLOR
+          : DRAGGED_MWO_PLACEHOLDER_COLOR
+        : plannedOverdue
+        ? MWO_OVERDUE_COLOR
+        : MWO_COLOR;
     if (desiredFillStyle !== ctx.fillStyle) {
       ctx.fillStyle = desiredFillStyle;
     }
-    ctx.fillRect(x, y, realMwoWidth, height);
+    ctx.fillRect(rStartX, y, rMwoWidth, height);
+
+    // render due date block
+    const dueDateX = element.dueIndexX * COL_WIDTH + X_OFFSET - scrollLeft;
+    if (X_OFFSET <= dueDateX && dueDateX <= X_OFFSET + CANVAS_DRAW_WIDTH) {
+      ctx.fillStyle = DUE_DATE_COLOR;
+      ctx.fillRect(dueDateX, y, DUE_DATE_INDICATOR_WIDTH, height);
+    }
 
     // only render anchors if mwo has full height
     if (!drag && height === ROW_HEIGHT) {
-      if (realMwoWidth === MWO_WIDTH) {
+      if (rMwoWidth === MWO_WIDTH) {
         ctx.beginPath();
         ctx.fillStyle = DRAG_ANCHOR_FRONT_COLOR;
         ctx.arc(
-          x + DRAG_ANCHOR_RADIUS,
+          rStartX +
+            DRAG_ANCHOR_RADIUS +
+            DUE_DATE_INDICATOR_WIDTH *
+              (element.startIndexX === element.dueIndexX), // dueDate === startDate
           y + ROW_HEIGHT / 2,
           DRAG_ANCHOR_RADIUS,
           0,
@@ -206,11 +231,11 @@ const renderElement = (element, y, height, startIndexX, endIndexX) => {
         ctx.fill();
       }
 
-      if (realMwoWidth >= DRAG_ANCHOR_RADIUS * 2) {
+      if (rMwoWidth >= DRAG_ANCHOR_RADIUS * 2) {
         ctx.fillStyle = DRAG_ANCHOR_BACK_COLOR;
         ctx.beginPath();
         ctx.arc(
-          x + realMwoWidth - DRAG_ANCHOR_RADIUS,
+          rStartX + rMwoWidth - DRAG_ANCHOR_RADIUS,
           y + ROW_HEIGHT / 2,
           DRAG_ANCHOR_RADIUS,
           0,
@@ -223,15 +248,26 @@ const renderElement = (element, y, height, startIndexX, endIndexX) => {
 
   // render element at position resulting from drag
   if (element.drag || dragDep) {
-    ctx.fillStyle = DRAGGED_MWO_COLOR;
+    // calc only once for element that is dragged
+    if (element.drag) {
+      const realX = dragX - X_OFFSET + scrollWrapper.scrollLeft;
+      outOfBounds =
+        realX < dragMinCol * COL_WIDTH
+          ? MIN_BOUND_CROSSED
+          : realX > dragMaxCol * COL_WIDTH + COL_WIDTH
+          ? MAX_BOUND_CROSSED
+          : NO_BOUND_CROSSED;
 
-    const realX = dragX - X_OFFSET + scrollWrapper.scrollLeft;
-    outOfBounds =
-      realX < dragMinCol * COL_WIDTH
-        ? MIN_BOUND_CROSSED
-        : realX > dragMaxCol * COL_WIDTH + COL_WIDTH
-        ? MAX_BOUND_CROSSED
-        : NO_BOUND_CROSSED;
+      ctx.fillStyle =
+        currentDragIndexX > element.dueIndexX
+          ? DRAGGED_MWO_OVERDUE_COLOR
+          : DRAGGED_MWO_COLOR;
+    } else {
+      ctx.fillStyle =
+        currentDragIndexX + dragDepLevel[element.code].delta > element.dueIndexX
+          ? DRAGGED_MWO_OVERDUE_COLOR
+          : DRAGGED_MWO_COLOR;
+    }
 
     const scrollLeft = scrollWrapper.scrollLeft;
     const xOffsetHelper = X_OFFSET - scrollLeft;
@@ -242,7 +278,7 @@ const renderElement = (element, y, height, startIndexX, endIndexX) => {
         : outOfBounds > NO_BOUND_CROSSED
         ? dragMaxCol * COL_WIDTH + xOffsetHelper + COL_WIDTH - 2 // stop before right border
         : dragMinCol * COL_WIDTH + xOffsetHelper + 2; // stop before left border
-    const x = baseX + (dragDepLevel[element.code]?.delta | 0) * COL_WIDTH; // use of single pipe | is intended here, binary operator hopefully faster
+    const x = baseX + (dragDepLevel[element.code]?.delta | 0) * COL_WIDTH; // use of single pipe | is intended here, bitwise operator hopefully faster
     ctx.fillRect(x, y, MWO_WIDTH, height);
   }
 };
@@ -463,7 +499,7 @@ function onScrollWrapperMouseDown(event) {
   const { colorSet, exactColor } = getColorFromEventPosition(event);
 
   // start drag
-  if (exactColor === MWO_COLOR) {
+  if (exactColor === MWO_COLOR || exactColor === MWO_OVERDUE_COLOR) {
     dragElementStartIndexX = realIndexX;
     dragElementStartIndexY = realIndexY;
     drag = true;
@@ -1040,7 +1076,11 @@ const DRAG_ANCHOR_BACK_COLOR = `rgb(2 2 2)`;
 const MWO_COLOR = `rgb(0 128 0)`;
 const DRAGGED_MWO_COLOR = `rgba(0, 128, 0, 0.8)`;
 const DRAGGED_MWO_PLACEHOLDER_COLOR = `rgba(0, 128, 0, 0.4)`;
+const MWO_OVERDUE_COLOR = `rgb(227 100 16)`;
+const DRAGGED_MWO_OVERDUE_COLOR = `rgba(227, 100, 16, 0.8)`;
+const DRAGGED_MWO_PLACEHOLDER_OVERDUE_COLOR = `rgba(227, 100, 16, 0.4)`;
 const CONNECTION_LINE_COLOR = `rgb(3 3 3)`;
+const DUE_DATE_COLOR = `rgb(4 4 4)`;
 const DRAGGED_MWO_CONNECTION_COLOR = `rgb(255 0 0)`;
 
 const SCROLL_SPEED_MS = 50;
@@ -1050,6 +1090,7 @@ const SCROLL_AREA = 50;
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const ROW_HEIGHT = 20;
 const MWO_WIDTH = 60;
+const DUE_DATE_INDICATOR_WIDTH = 5;
 
 const COL_WIDTH_DAY = 60;
 const COL_WIDTH_DAY_WEEK = 30;
@@ -1140,9 +1181,9 @@ virtualSize.style.width = `${xLabels.length * COL_WIDTH}px`;
 
 // FOR TESTING PURPOSES -------------------------------------------------------------------------
 const testConnections = [
-  // [0, 0, 699, 211],
-  // [6, 2, 9, 4],
-  // [6, 3, 9, 4],
+  [0, 0, 699, 211],
+  [6, 2, 9, 4],
+  [6, 3, 9, 4],
   [5, 1, 9, 4],
   [5, 1, 13, 5],
   [9, 4, 25, 9],
@@ -1215,3 +1256,11 @@ render(performance.now());
 // DHTMLX license
 // anychart
 // styling implies make
+
+// TODO1: use logic in other places, too
+// hypothetical start/end of element on x-axis
+// const hSTartX = element.startIndexX * COL_WIDTH + X_OFFSET - scrollLeft;
+// const hEndX = hSTartX + COL_WIDTH;
+// const realStartX = Math.max(X_OFFSET, hSTartX);
+// const realEndX = Math.min(hEndX, X_OFFSET + CANVAS_DRAW_WIDTH);
+// const realMwoWidth = realEndX - realStartX;
