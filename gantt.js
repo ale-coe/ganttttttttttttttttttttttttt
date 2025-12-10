@@ -794,16 +794,27 @@ const moveMwoAfterDrag = (index, indexY, dragTargetIndexX) => {
 
   mwo.startDate = new Date(xLabels[dragTargetIndexX]);
   mwo.startIndexX = dragTargetIndexX;
+
   for (let i = 0; i < mwo.connectionsAsStart.length; i++) {
     mwo.connectionsAsStart[i].startIndexX = dragTargetIndexX;
+    const { startIndexX, startIndexY, endIndexX, endIndexY } =
+      mwo.connectionsAsStart[i];
+    mwo.connectionsAsStart[
+      i
+    ].id = `${startIndexX}.${startIndexY}.${endIndexX}.${endIndexY}`;
   }
 
   for (let i = 0; i < mwo.connectionsAsEnd.length; i++) {
     mwo.connectionsAsEnd[i].endIndexX = dragTargetIndexX;
+    const { startIndexX, startIndexY, endIndexX, endIndexY } =
+      mwo.connectionsAsEnd[i];
+    mwo.connectionsAsEnd[
+      i
+    ].id = `${startIndexX}.${startIndexY}.${endIndexX}.${endIndexY}`;
   }
 
   for (let i = 0; i < mwo.predecessorMwos.length; i++) {
-    // get all successorMwos from current item, min index is new maxCol
+    // get all successorMwos from current item, min index is new maxCol (own startDate has already been updated)
     mwo.predecessorMwos[i].maxCol =
       Math.min(
         ...mwo.predecessorMwos[i].successorMwos.map((sMwo) =>
@@ -813,7 +824,7 @@ const moveMwoAfterDrag = (index, indexY, dragTargetIndexX) => {
   }
 
   for (let i = 0; i < mwo.successorMwos.length; i++) {
-    // get all predecessorMwos from current item, max index is new minCol
+    // get all predecessorMwos from current item, max index is new minCol (own startDate has already been updated)
     mwo.successorMwos[i].minCol =
       Math.max(
         ...mwo.successorMwos[i].predecessorMwos.map((pMwo) =>
