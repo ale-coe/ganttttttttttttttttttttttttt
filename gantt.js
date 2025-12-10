@@ -54,8 +54,13 @@ const render = (timestamp) => {
 
     rowArr[i] = { y, height };
 
+    // + 5 to push it to the right
     // + 15 to push it to the middle
-    ctx.fillText(codes[i], 2, y - (ROW_HEIGHT - height) + 15);
+    ctx.fillText(
+      codes[i],
+      i === dragElementStartIndexY ? 25 : 5,
+      y - (ROW_HEIGHT - height) + 15
+    );
   }
 
   const colArr = Array(maxCol);
@@ -864,6 +869,8 @@ addEventListener("mouseup", (event) => {
     dragDepLevel = {};
     dragMinCol = days.length - 1;
     dragMaxCol = 0;
+    dragElementStartIndexX = -1;
+    dragElementStartIndexY = -1;
     requestAnimationFrame(render);
   }
 
@@ -1148,8 +1155,8 @@ let connections = [];
 let intervalTimer = null;
 let timeoutTimer = null;
 
-let dragElementStartIndexX = 0;
-let dragElementStartIndexY = 0;
+let dragElementStartIndexX = -1;
+let dragElementStartIndexY = -1;
 let dragX = 0;
 let drag = false;
 
