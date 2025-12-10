@@ -1,7 +1,9 @@
 const getDates = (items) => {
+  const startOffset = 0;
+  const endOffset = 30;
   const dates = [];
-  const startDate = items[0].startDate - START_OFFSET * MS_PER_DAY;
-  const endDate = items[items.length - 1].startDate + END_OFFSET * MS_PER_DAY;
+  const startDate = items[0].startDate - startOffset * MS_PER_DAY;
+  const endDate = items[items.length - 1].startDate + endOffset * MS_PER_DAY;
 
   let date = startDate;
   while (date < endDate) {
@@ -904,19 +906,29 @@ addEventListener("mouseup", (event) => {
 
 addEventListener("keydown", (event) => {
   // !event.repeat prevents indefinite pressing from being emitted over and over again
-  if (event.ctrlKey && !event.repeat) {
-    const _event = {
-      clientX: connectionEndX,
-      clientY: connectionEndY,
-    };
-    const { exactColor } = getColorFromEventPosition(_event);
+  if (event.key === "Control" && !event.repeat) {
+    if (connectionMode) {
+      const _event = {
+        clientX: connectionEndX,
+        clientY: connectionEndY,
+      };
+      const { exactColor } = getColorFromEventPosition(_event);
 
-    if (exactColor === DRAG_ANCHOR_BACK_COLOR) {
-      const { indexX, indexY } = getIndicesFromEvent(_event);
+      if (exactColor === DRAG_ANCHOR_BACK_COLOR) {
+        const { indexX, indexY } = getIndicesFromEvent(_event);
 
-      const { realIndexX, realIndexY } = getRealIndicesFromEvent(_event);
-      connectionIndicators.push([indexX, indexY, realIndexX, realIndexY]);
+        const { realIndexX, realIndexY } = getRealIndicesFromEvent(_event);
+        connectionIndicators.push([indexX, indexY, realIndexX, realIndexY]);
+      }
     }
+
+    ctrlPressed = true;
+  }
+});
+
+addEventListener("keyup", (event) => {
+  if (event.key === "Control") {
+    ctrlPressed = false;
   }
 });
 
@@ -966,6 +978,21 @@ document.querySelector("#radiogroup").addEventListener("change", (e) => {
 document.getElementById("cascading-drag").addEventListener("change", (e) => {
   DRAG_DEP_MAX_LEVEL = e.target.checked ? 3 : 0;
 });
+
+document.addEventListener(
+  "wheel",
+  (event) => {
+    if (ctrlPressed) {
+      event.preventDefault();
+
+      const factor = event.deltaY < 0 ? -1 : event.deltaY > 0 ? 1 : 0;
+      ROW_HEIGHT = Math.min(Math.max(10, ROW_HEIGHT - factor), 20);
+      COL_WIDTH = Math.min(Math.max(5, COL_WIDTH - factor * 5), COL_WIDTH_DAY);
+      requestAnimationFrame(render);
+    }
+  },
+  { passive: false }
+);
 
 const addConnection = (
   connectionStartIndexX,
@@ -1069,9 +1096,6 @@ const getCalendarWeek = (date) => {
   return `${d.getUTCFullYear()}-${weekNum}`;
 };
 
-const END_OFFSET = 30;
-const START_OFFSET = 0;
-
 const FIRST_COL_COLOR = `rgb(255 255 255)`;
 const SECOND_COL_COLOR = `rgb(155 155 155)`;
 const TEXT_COLOR = `rgb(0 0 0)`;
@@ -1092,7 +1116,7 @@ const SCROLL_SPEED_PX = 50;
 const SCROLL_AREA = 50;
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
-const ROW_HEIGHT = 20;
+let ROW_HEIGHT = 20;
 const MWO_WIDTH = 60;
 const DUE_DATE_INDICATOR_WIDTH = 5;
 
@@ -1170,6 +1194,8 @@ let connectionEndX = 0;
 let connectionEndY = 0;
 let connectionMode = false;
 let lastRenderTimestamp = 0;
+
+let ctrlPressed = false;
 
 for (let i = 0; i < items.length; i++) {
   const item = items[i];
