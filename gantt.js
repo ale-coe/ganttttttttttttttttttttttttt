@@ -187,15 +187,12 @@ const renderElement = (
   // render element at current "real" position
   if (element.startIndexX >= startIndexX && element.startIndexX <= endIndexX) {
     // (h)ypothetical/(r)eal start of element on x-axis
-    const hStartX = element.startIndexX * COL_WIDTH;
-    const rStartX =
-      (hStartX < scrollWrapper.scrollLeft
-        ? scrollWrapper.scrollLeft
-        : hStartX) +
-      X_OFFSET -
-      scrollWrapper.scrollLeft;
-    const rMwoWidth =
-      MWO_WIDTH - (rStartX - X_OFFSET + scrollWrapper.scrollLeft - hStartX);
+    const hSTartX = element.startIndexX * COL_WIDTH + X_OFFSET - scrollLeft;
+    const hEndX = hSTartX + MWO_WIDTH;
+    const rStartX = Math.max(X_OFFSET, hSTartX);
+    const rEndX = Math.min(hEndX, X_OFFSET + CANVAS_DRAW_WIDTH);
+    const rMwoWidth = rEndX - rStartX;
+
     const plannedOverdue = element.startIndexX > element.dueIndexX;
 
     const desiredFillStyle =
@@ -1263,11 +1260,3 @@ render(performance.now());
 // DHTMLX license
 // anychart
 // styling implies make
-
-// TODO1: use logic in other places, too
-// hypothetical start/end of element on x-axis
-// const hSTartX = element.startIndexX * COL_WIDTH + X_OFFSET - scrollLeft;
-// const hEndX = hSTartX + COL_WIDTH;
-// const realStartX = Math.max(X_OFFSET, hSTartX);
-// const realEndX = Math.min(hEndX, X_OFFSET + CANVAS_DRAW_WIDTH);
-// const realMwoWidth = realEndX - realStartX;
